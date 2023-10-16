@@ -1,0 +1,74 @@
+Carey is probably right and trying to do this with grammar is kind of stupid -- maybe simple sentences but simple sounds doesn't 
+make a lot of sense. What is the peer teaching, it is almost to basic too teach. 
+
+Goal - Students use chat gpt and other genarative AI to create a virtual assitent that can they can teach how to say certain words 
+
+Questions? 
+    - How is the Ai going to learn?
+    - How are we going to track the student teaching?
+    - If the student has a hard time reading and writing, how are they going to teach the Ai? 
+    - What will the website look like?
+    - What will even the demo look like?
+
+Anwsers? 
+    - We would probably need to do this ALL in text to speech, assume the student can't read or write (this sounds hard)
+    - Prehapse we get the student to just correct the AI? We will present the AI with some cards, the AI will attempt to read them
+    and the student has to responded with if they are good or bad ideas. 
+    - Going with our orginal 
+
+
+What I am trying to do in this code:
+    - All this will take place in Demo (maybe not sure how the HTML works yet)
+    - User meets George 
+    - User is prompted with some basic sounds matched with some images from Star Wars 
+        - this should be hard coded for the demo but could eventually be left to GAI 
+            - Maybe the user selects a broad catagory, then lots of code to find image that corrosponds to each 
+            sound used in English. Not sure how we would check this. -- see below for some more ideas 
+    - George then asked how do you say ______
+        - This I imagine will be a hard coded dictionary 
+    - User is provided with 5 choices (maybe more or less), they must select the 3 (in order) that corrospond to how to say the word 
+        - Would love this to be quite dynamic with a nice slidely animated function, again no idea how to code this but
+        can probably figure out 
+    - George then attempts to read the word 
+        - Would love to use text to speech for this, no idea how the API works - will have to learn 
+    - If you are right George will read the word correctly if you are wrong you will be prompted to try again
+    - Repeat 
+        - Keep stats? High scores? Other data? 
+This all works and may be useful but does it have enough peer tutoring and GAI???
+
+
+
+
+
+What we could do instead:
+    Create a peer tutoring app: (This is basically what I said above)
+        - Idea 
+            - The app will let you pick a catagory, 
+            - then will generate images for each sound, 
+            - then will display images and ask for sound that corrisponds with said image. 
+            - Then some speech regonition will say if your right or wrong 
+        - Pros:
+            - While not "easy" this is very doable 
+                - Basic framework 
+                    - Screen 1:
+                        * Enter a franchise you like 
+                        * Auto generate images for each sound from this franchise 
+                        * let the student pick certain sounds that they don't like and have them change the sounds 
+                        * have the students save there "deck" of sounds and photos 
+                            - Assume we can do this using a sql file and labeling created photos 
+                    - Screen 2:
+                        * Display a photo 
+                        * Have the student say the words outloud
+                        * Display wether they got it right or wrong 
+                        * repeat 
+            - Would probably be pretty useful 
+        - Cons:
+            - Is not a great use of genarative AI 
+            - Is not peer tutoring 
+    Pivot away from basic sounds to maybe grammar and math
+        -Idea (this is what we had before)
+            - Pick a topic 
+            - Have GAI ask a question about somthing they don't understand 
+            - Have us explain that idea 
+            - Have the GAI ask follow up questions 
+            - Repeat until some check says they are right??? 

@@ -1,22 +1,18 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
 %}
-<h1 align="center">Notes Hi</h1>
-<img src="{{ url_for('static', filename='image1.jpg') }}" alt="Image 1">
-<ul class="list-group list-group-flush" id="notes">
-  {% for note in user.notes %}
-  <li class="list-group-item">
-    {{ note.data }}    
-    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </li>
-  {% endfor %}
-</ul>
-<form method="POST">
-  <textarea name="note" id="note" class="form-control"></textarea>
-  <br />
-  <div align="center">
-    <button type="submit" class="btn btn-primary">Add Note</button>
+
+<body>
+  <div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+    <div class="text-center">
+        <h1 style="font-size: 72px; color: #007BFF;">Welcome!</h1>
+        <p style="color: #333;">Are you ready to start your very own learning adventure?</p>
+        <p style="color: #333;">In this short demo you will get the chance to choose some cards and practice learning the letters</p>
+        <button class="btn btn-primary" onclick="window.location.href='/demo'">Let's Get Started</button>
   </div>
-</form>
+
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+</body>
+
 {% endblock %}
