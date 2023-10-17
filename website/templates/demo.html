@@ -2,50 +2,86 @@
     %}
 
 
-    <!DOCTYPE html>
     <html>
-    <head>
-        <title>Meet George</title>
-        <style>
-            /* Styling for the layout */
-            .container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px;
-            }
-            .left {
-                flex: 1;
-                padding: 10px;
-            }
-            .right {
-                flex: 1;
-                text-align: right;
-            }
-            .george-image {
-                max-width: 100%;
-                height: auto;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="left">
-                <p>
-                    Meet George, George is a 2nd grader struggling with how to pronounce certain words. 
-                    George really likes Star Wars and knows the names of every character in the franchise. 
-                    Help George learn to read by selecting the characters that correspond to each part of the word. 
-                    If you can't remember who a certain character represents, ask George; he is sure to know them all.
-                </p>
-                <!-- This button is badly aligned but I'm to lazy to fix-->
-                <button class="btn btn-primary btn-lg rounded-circle">Next</button> 
-            <div class="right">
-                <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
+        <head>
+            <title>Meet George</title>
+            <style>
+                /* Styling for the layout */
+                .container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 20px;
+                }
+                .left {
+                    flex: 1;
+                    padding: 10px;
+                }
+                .right {
+                    flex: 1;
+                    text-align: right;
+                }
+                .george-image {
+                    max-width: 100%;
+                    height: auto;
+                }
+                
+
+                /* Style for the container */
+                .image-container {
+                    display: none;
+                    flex-direction: column; /* Stack images vertically */
+                    align-items: Right; /* Places the images right horizontally */
+                    gap: 10px
+                }
+                /* Style for each image */
+                .image {
+                    max-width: 100%; /* Ensure images fit within the container */
+                    height: auto; /* Maintain the aspect ratio of the images */
+                    margin: 10px 0; /* Add some vertical spacing between images */
+                }
+    </style>
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="left">
+                    <p>
+                        Meet George, George is a 2nd grader struggling with how to pronounce certain words. 
+                        George really likes Star Wars and knows the names of every character in the franchise. 
+                        Help George learn to read by selecting the characters that correspond to each part of the word. 
+                        If you can't remember who a certain character represents, ask George; he is sure to know them all.
+                    </p>
+                    <!-- Button with an id for reference -->
+                    <button class="btn btn-primary btn-lg rounded-circle" id="next-button">Next</button>
+                </div>
+                <div class="right">
+                    <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
+                </div>
             </div>
-            
-        </div>
-    </body>
-    </html>
+        
+            <!-- Block to display the grid initially hidden -->
+            <div class="image-container" style="display: none;">
+                <img class="image" src="{{ url_for('static', filename='Aaa.png') }}" alt="Image 1">
+                <img class="image" src="{{ url_for('static', filename='Baby.png') }}" alt="Image 2">
+                <img class="image" src="{{ url_for('static', filename='Princess.png') }}" alt="Image 3">
+            </div>
+            <script>
+                const nextButton = document.querySelector('#next-button');
+                const images = document.querySelector('.image-container');
+                const georgeImage = document.querySelector('.george-image');
+                const leftText = document.querySelector('.left');
+        
+                // Handle the "Next" button click event
+                nextButton.addEventListener('click', () => {
+                    leftText.style.display = 'none'; // Hide the text
+                    images.style.display = 'flex'; // Show the grid
+                    georgeImage.style.display = 'block'; // Show George's image
+                });
+            </script>
+        
+        </body>
+        </html>
     
 
 
