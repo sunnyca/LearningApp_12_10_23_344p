@@ -47,38 +47,17 @@
             <div class="container">
                 <div class="left">
                     <p>
-                        Meet George, George is a 2nd grader struggling with how to pronounce certain words. 
-                        George really likes Star Wars and knows the names of every character in the franchise. 
-                        Help George learn to read by selecting the characters that correspond to each part of the word. 
+                        Meet George, George is a 2nd grader struggling with how to pronounce certain words. George wants to know what movies or books series you like so he can learn from you about different letter sounds! Help George learn to read by selecting the characters that correspond to each part of the word. 
                         If you can't remember who a certain character represents, ask George; he is sure to know them all.
                     </p>
                     <!-- Button with an id for reference -->
-                    <button class="btn btn-primary btn-lg rounded-circle" id="next-button">Next</button>
+                <button class="btn btn-primary" onclick="window.location.href='/intro_flow_2'">Continue</button>
                 </div>
                 <div class="right">
                     <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
                 </div>
             </div>
-        
-            <!-- Block to display the grid initially hidden -->
-            <div class="image-container" style="display: none;">
-                <img class="image" src="{{ url_for('static', filename='Aaa.png') }}" alt="Image 1">
-                <img class="image" src="{{ url_for('static', filename='Baby.png') }}" alt="Image 2">
-                <img class="image" src="{{ url_for('static', filename='Princess.png') }}" alt="Image 3">
-            </div>
-            <script>
-                const nextButton = document.querySelector('#next-button');
-                const images = document.querySelector('.image-container');
-                const georgeImage = document.querySelector('.george-image');
-                const leftText = document.querySelector('.left');
-        
-                // Handle the "Next" button click event
-                nextButton.addEventListener('click', () => {
-                    leftText.style.display = 'none'; // Hide the text
-                    images.style.display = 'flex'; // Show the grid
-                    georgeImage.style.display = 'block'; // Show George's image
-                });
-            </script>
+
         
         </body>
         </html>

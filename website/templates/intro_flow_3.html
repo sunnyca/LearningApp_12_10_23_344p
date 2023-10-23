@@ -1,0 +1,73 @@
+{% extends "intro_flow_2.html" %} {% block title %}Home{% endblock %} {% block content
+    %}
+
+
+    <html>
+        <head>
+            <title>Meet George</title>
+            <style>
+                /* Styling for the layout */
+                .container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 20px;
+                }
+                .left {
+                    flex: 1;
+                    padding: 10px;
+                }
+                .right {
+                    flex: 1;
+                    text-align: right;
+                }
+                .george-image {
+                    max-width: 100%;
+                    height: auto;
+                }
+                
+
+                /* Style for the container */
+                .image-container {
+                    display: none;
+                    flex-direction: column; /* Stack images vertically */
+                    align-items: Right; /* Places the images right horizontally */
+                    gap: 10px
+                }
+                /* Style for each image */
+                .image {
+                    max-width: 100%; /* Ensure images fit within the container */
+                    height: auto; /* Maintain the aspect ratio of the images */
+                    margin: 10px 0; /* Add some vertical spacing between images */
+                }
+    </style>
+            </style>
+        </head>
+        <body>
+
+            <div class="container">
+                <div class="left">
+                            <script>
+        // JavaScript code to set the franchise value
+        const franchiseValue = document.getElementById('franchise');
+
+        franchiseValue.textContent = franchiseValue; // Set the content of the span with the franchise value
+         </script>
+                    <p>
+                        You're ready to start learning with George! He is so excited to learn more about {{ franchise }}
+                    </p>
+                    <!-- Button with an id for reference -->
+                <button class="btn btn-primary" onclick="window.location.href='/intro_flow_2'">Continue</button>
+                </div>
+                <div class="right">
+                    <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
+                </div>
+            </div>
+
+        
+        </body>
+        </html>
+    
+
+
+{% endblock %}
