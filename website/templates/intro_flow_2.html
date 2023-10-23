@@ -1,0 +1,79 @@
+{% extends "intro_flow_1.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+
+
+<html>
+<head>
+    <title>Meet George</title>
+    <style>
+        /* Styling for the layout */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+        .left {
+            flex: 1;
+            padding: 10px;
+        }
+        .right {
+            flex: 1;
+            text-align: right;
+        }
+        .george-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+
+        /* Style for the container */
+        .image-container {
+            display: none;
+            flex-direction: column; /* Stack images vertically */
+            align-items: Right; /* Places the images right horizontally */
+            gap: 10px
+        }
+        /* Style for each image */
+        .image {
+            max-width: 100%; /* Ensure images fit within the container */
+            height: auto; /* Maintain the aspect ratio of the images */
+            margin: 10px 0; /* Add some vertical spacing between images */
+        }
+    </style>
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <p>
+                What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
+            </p>
+            <form id="franchise-form">
+                <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
+                <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
+                <button type="submit" class="btn btn-primary" onclick="window.location.href='/intro_flow_3'">Submit</button>
+            </form>
+        </div>
+        <div class="right">
+            <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
+        </div>
+    </div>
+    <script>
+        const franchiseForm = document.querySelector('#franchise-form');
+        const franchiseInput = document.querySelector('#franchise-input');
+        const georgeImage = document.querySelector('.george-image');
+
+        franchiseForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the form from submitting
+            const franchise = franchiseInput.value; // Store the user's answer in the 'franchise' variable
+            franchiseInput.disabled = true; // Lock the input
+            georgeImage.style.display = 'block'; // Show George's image
+        });
+    </script>
+</body>
+</html>
+
+
+
+{% endblock %}
