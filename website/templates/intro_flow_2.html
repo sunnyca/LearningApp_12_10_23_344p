@@ -49,11 +49,12 @@
             <p>
                 What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
             </p>
-            <form id="franchise-form">
-                <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
-                <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
-                <button type="submit" class="btn btn-primary" onclick="window.location.href='/intro_flow_3'">Submit</button>
-            </form>
+ <form id="franchise-form" action="/intro_flow_2" method="POST">
+    <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
+    <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
+        <button class="btn btn-primary" onclick="window.location.href='/intro_flow_3'">Continue</button>
+</form>
+
         </div>
         <div class="right">
             <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
