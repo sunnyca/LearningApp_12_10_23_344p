@@ -2,9 +2,15 @@ from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
 from flask import session
 from .models import Note
+from .models import Franchise
 from . import db
 import json
-from flask import g
+from flask import Flask, g
+
+import openai
+import urllib.request
+from PIL import Image
+import matplotlib.pyplot as plt
 
 views = Blueprint('views', __name__)
 
@@ -34,16 +40,23 @@ def intro_flow_1():
 @login_required
 def intro_flow_2():
     if request.method == 'POST':
-        franchise = request.form.get('franchise')
-        g.franchise = franchise  # Set the franchise in the global context
+        f = request.form.get('franchise-input')
+
+        # Create a new UserResponse instance and save it to the database
+        user_response = Franchise(franchise=f)
+        db.session.add(user_response)
+        db.session.commit()
+
+        return redirect(url_for('views.intro_flow_3')) 
     return render_template('intro_flow_2.html', user=current_user)
 
 @views.route('/intro_flow_3', methods=['GET'])
 @login_required
 def intro_flow_3():
-    franchise = getattr(g, 'franchise', "Default Value if Not Found")
-
+    franchise = Franchise.query.first()  # Get the first (or appropriate) user response
+    print(franchise)
     return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
+
 @views.route('/delete-note', methods=['POST'])
 def delete_note():  
     note = json.loads(request.data) # this function expects a JSON from the INDEX.js file 
