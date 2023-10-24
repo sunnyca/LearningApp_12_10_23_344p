@@ -16,8 +16,4 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150))
     first_name = db.Column(db.String(150))
     notes = db.relationship('Note')
-
-
-class Franchise(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    franchise = db.Column(db.String(100), nullable=False)
+    franchise = db.Column(db.String(150))

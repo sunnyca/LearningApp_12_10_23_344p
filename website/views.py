@@ -2,11 +2,12 @@ from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
 from flask import session
 from .models import Note
-from .models import Franchise
+from .models import User
 from . import db
 import json
 from flask import Flask, g
-
+from flask import redirect
+from flask import url_for
 import openai
 import urllib.request
 from PIL import Image
@@ -23,7 +24,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 views = Blueprint('views', __name__)
-openai.api_key = "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"
+openai.api_key = "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"
 
 
 @views.route('/', methods=['GET', 'POST'])
@@ -51,11 +52,15 @@ def intro_flow_1():
 @login_required
 def intro_flow_2():
     if request.method == 'POST':
-        f = request.form.get('franchise-input')
+        print(request.form)
 
-        # Create a new UserResponse instance and save it to the database
-        user_response = Franchise(franchise=f)
-        db.session.add(user_response)
+        franchise = request.form.get('franchise')
+
+        current_user_id = current_user.id
+
+        # Query the User model to find the user by ID
+        user = User.query.filter_by(id=current_user_id).first()
+        user.franchise=franchise
         db.session.commit()
 
         return redirect(url_for('views.intro_flow_3')) 
@@ -64,11 +69,16 @@ def intro_flow_2():
 @views.route('/intro_flow_3', methods=['GET'])
 @login_required
 def intro_flow_3():
+    current_user_id = current_user.id
+
+    # Query the User model to find the user by ID
+    user = User.query.filter_by(id=current_user_id).first()
+
     # Your existing code to retrieve the franchise data
-    franchise = Franchise.query.first()
+    franchise = user.franchise
 
     # Add the generative AI component
-    yourStory = "Star Wars"  # Hard Coded Currently (Needs to be dynamic)
+    yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
     botResponse = openai.Completion.create(
         model="text-davinci-003",
@@ -88,15 +98,19 @@ def intro_flow_3():
     )
     image_url = response['data'][0]['url']
     print(image_url)
+    script_path = os.path.abspath(__file__)
+    print(f"The path to this script is: {script_path}")
+
     image_response = requests.get(image_url)
     #if image_response.status_code == 200:
-    #    with open("static/result.png", "wb") as image_file:
+    #    with open("Users/rachaelharkavy/Documents/Fall 2023/CS Project/git repo/LearningApp/website/static/result.png", "wb") as image_file:
     #        image_file.write(image_response.content)
 
-    # Now, you can pass the image URL to the HTML template
     #image_url = url_for('static', filename='result.png')
 
-    # add below , image_url=image_url
+    #add below  --> , image_url=image_url)
+
+
     return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
 
 @views.route('/delete-note', methods=['POST'])
