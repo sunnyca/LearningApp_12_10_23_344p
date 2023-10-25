@@ -18,6 +18,9 @@ import ssl
 import requests
 import os 
 
+from gtts import gTTS 
+  
+  
 #IMPORTANT OR ELSE WE CANNOT MAKE THIS WORK 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -46,7 +49,13 @@ def home():
 @views.route('/intro_flow_1', methods=['GET', 'POST'])
 @login_required
 def intro_flow_1():
+    if request.method == 'POST':
+        if int(request.form['play']) == 1:
+            os.system("mpg321 welcome.mp3")
+        else:    
+            return render_template("intro_flow_1.html", user=current_user)
     return render_template("intro_flow_1.html", user=current_user)
+    
 
 @views.route('/intro_flow_2', methods=['GET', 'POST'])
 @login_required

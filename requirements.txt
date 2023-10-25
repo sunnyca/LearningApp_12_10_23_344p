@@ -1,4 +1,7 @@
 flask
 Flask-SQLAlchemy
-flask-login 
+flask-login
+# flask_migrate
+# openai
+# Pillow
 Werkzeug==2.3.0
