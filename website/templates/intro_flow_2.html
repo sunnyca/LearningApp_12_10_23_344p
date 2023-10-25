@@ -60,18 +60,6 @@
             <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
         </div>
     </div>
-    <script>
-        const franchiseForm = document.querySelector('#franchise-form');
-        const franchiseInput = document.querySelector('#franchise-input');
-        const georgeImage = document.querySelector('.george-image');
-
-        franchiseForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Prevent the form from submitting
-            const franchise = franchiseInput.value; // Store the user's answer in the 'franchise' variable
-            franchiseInput.disabled = true; // Lock the input
-            georgeImage.style.display = 'block'; // Show George's image
-        });
-    </script>
 </body>
 </html>
 
