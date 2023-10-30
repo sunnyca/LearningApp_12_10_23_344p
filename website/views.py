@@ -24,10 +24,8 @@ from gtts import gTTS
 #IMPORTANT OR ELSE WE CANNOT MAKE THIS WORK 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-
-
 views = Blueprint('views', __name__)
-openai.api_key = "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"
+openai.api_key = os.environ['API_KEY']
 
 
 @views.route('/', methods=['GET', 'POST'])
@@ -91,7 +89,7 @@ def intro_flow_3():
 
     botResponse = openai.Completion.create(
         model="text-davinci-003",
-        prompt="Print out a picture that describes this: " + yourStory,
+        prompt="A visual cartoon version of the " + yourStory + " franchise",
         temperature=0.5,
         max_tokens=120,
         top_p=1.0,
@@ -103,7 +101,7 @@ def intro_flow_3():
     response = openai.Image.create(
         prompt=botResponse,
         n=1,
-        size="1024x1024"
+        size="512x512"
     )
     image_url = response['data'][0]['url']
     print(image_url)
@@ -111,17 +109,20 @@ def intro_flow_3():
     print(f"The path to this script is: {script_path}")
 
     image_response = requests.get(image_url)
-    #if image_response.status_code == 200:
-    #    with open("Users/rachaelharkavy/Documents/Fall 2023/CS Project/git repo/LearningApp/website/static/result.png", "wb") as image_file:
-    #        image_file.write(image_response.content)
+    if image_response.status_code == 200:
+        with open("website/static/franchise_logo.png", "wb") as image_file:
+            image_file.write(image_response.content)
 
-    #image_url = url_for('static', filename='result.png')
+    image_url = url_for('static', filename='franchise_logo.png')
 
-    #add below  --> , image_url=image_url)
+    return render_template('intro_flow_3.html', user=current_user, franchise=franchise, image_url=image_url)
 
+@views.route('/progress_tracker', methods=['GET', 'POST'])
+@login_required
+def progress_tracker():
 
-    return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
-
+    return render_template("progress_tracker.html", user=current_user)
+    
 @views.route('/delete-note', methods=['POST'])
 def delete_note():  
     note = json.loads(request.data) # this function expects a JSON from the INDEX.js file 
