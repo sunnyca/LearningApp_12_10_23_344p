@@ -72,3 +72,14 @@ What we could do instead:
             - Have us explain that idea 
             - Have the GAI ask follow up questions 
             - Repeat until some check says they are right??? 
+
+
+
+More thoughts:
+    I make it impossible to update franchise. Do we want to change this?
+    Big error -- I am storing the created images locally, then checking to see if these images exist for wether or not to regenerate 
+    the images. What this means is that a new account won't be prompted to regenerate image. Need to fix. 
+    Also it seems there are errors changing users, probably introduced on my end 
+    Very buggy at the moment so will need to fix that
+        * Most regenerate buttons work but not all 
+        * if you have all ready generated a flash card you are still prompted to try again which causes problems. 
