@@ -19,9 +19,14 @@ import requests
 import os 
 
 from gtts import gTTS 
-  
 
-
+order = ["sh","p","b","i"] #this needs to be updated as we introduce more letters 
+characters = []
+image_info = {'franchise_sh.png':' it says /sh/',
+                'franchise_p.png': " it says /p/",
+                'franchise_b.png':' it says /b/',
+                'franchise_i.png':' it says /i/',
+                'franchise_logo.png':''}
 
 #IMPORTANT OR ELSE WE CANNOT MAKE THIS WORK 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -129,7 +134,7 @@ def intro_flow_3():
     # Add the generative AI component
     yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
-    if not os.path.exists("website/static/franchise_sh0.png"): #Checks to see if image already exists, if it exists does not regenerate 
+    if not os.path.exists("website/static/franchise_logo.png"): #Checks to see if image already exists, if it exists does not regenerate 
         botResponse = openai.Completion.create(
             model="text-davinci-003",
             prompt="A visual cartoon version of the " + yourStory + " franchise",
@@ -168,6 +173,7 @@ def intro_flow_4():
     #Checks to see if image already exists, if it exists does not regenerate 
     if not os.path.exists("website/static/franchise_sh1.png"): 
         character = generate_images("sh",1)
+        characters.append(character)
         return render_template("intro_flow_4.html", user=current_user,character=character)
     else:
         botResponse = openai.Completion.create(
@@ -187,13 +193,13 @@ def intro_flow_4():
 @views.route('/regenerate', methods=['GET', 'POST'])
 @login_required
 def regenerate():
-    order = ["sh","p","b","i"] #this needs to be updated as we introduce more letters 
     if request.form.get('sound') in order:
         index = order.index(request.form.get('sound'))
         i = str(index + 4)
     if request.method == 'POST':
         print(request.form.get('sound'))
-        character = generate_images(request.form.get('sound'),1)
+        character= generate_images(request.form.get('sound'),1)
+        characters[i] = (character)
         return render_template("intro_flow_"+ i +".html", user=current_user, character=character) 
     else:
         return render_template("intro_flow_"+ i +".html", user=current_user)
@@ -212,6 +218,7 @@ def store_image_1():
             else:
                 os.rename("website/static/franchise_sh"+str(i)+".png", "website/static/franchise_sh.png")
         character = generate_images('p',1)
+        characters.append(character)
         return render_template("intro_flow_5.html", user=current_user,character=character)
     else:
         return render_template("intro_flow_4.html", user=current_user)
@@ -228,6 +235,7 @@ def store_image_2():
             else:
                 os.rename("website/static/franchise_p"+str(i)+".png", "website/static/franchise_p.png") #renames the selected image to franchise_p.png
         character = generate_images('b',1)
+        characters.append(character)
         return render_template("intro_flow_6.html", user=current_user,character=character)
     else:
         return render_template("intro_flow_5.html", user=current_user)
@@ -243,6 +251,7 @@ def store_image_3():
             else:
                 os.rename("website/static/franchise_b"+str(i)+".png", "website/static/franchise_b.png")
         character = generate_images('i',1)
+        characters.append(character)
         return render_template("intro_flow_7.html", user=current_user,character=character)
     else:
         return render_template("intro_flow_6.html", user=current_user)
@@ -266,20 +275,24 @@ def store_image_i():
 
 
 
+@views.route('/games', methods=['GET', 'POST'])
+@login_required
+def games():
+    return render_template("games.html", user=current_user)
 
 
 
-
-
+#this is broken because the characters list is not globaly defined I believe, so the first time you itterate through 
+#it works but the second time characters is an empty list so breaks. We probably have to add characters to database 
+#but I didn't know how to do that.
 @views.route('/progress_tracker', methods=['GET', 'POST'])
 @login_required
 def progress_tracker():
-    image_info = {'franchise_b.png':'Your /b/ sound',
-                    'franchise_i.png': 'Your /i/ sound', 
-                    'franchise_logo.png': 'Your franchise logo', 
-                    'franchise_p.png': 'Your /p/ sound', 
-                    'franchise_sh.png': 'Your /sh/ sound'}
+    characters.append('your franchise logo!')
+    print(characters)
     existing_images = [image for image in image_info if os.path.exists(f"website/static/{image}")]
+    for image in existing_images:
+        image_info[image] = 'This is ' + characters[existing_images.index(image)] + image_info[image]
     return render_template("progress_tracker.html", user=current_user,existing_images=existing_images,image_info=image_info)
     
 @views.route('/delete-note', methods=['POST'])

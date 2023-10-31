@@ -1,0 +1,121 @@
+{% extends "intro_flow_2.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<html>
+<head>
+    <title>Meet George</title>
+    <style>
+        .container {
+            position: center;
+            display: inline-block;
+        }
+        .text-box {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            display: block;
+            z-index: 1;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: space-around;
+        }
+        .image {
+            width: 200px; /* Adjust the width of the images */
+            height: auto; /* Maintain aspect ratio */
+            border: 2px solid transparent; /* Initially no border */
+            cursor: pointer; /* Change cursor to pointer */
+            transition: border 0.3s; /* Add a smooth transition effect */
+        }
+        .selected {
+            border: 2px solid blue; /* Highlight color for selected images */
+        }
+        .text {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <div>
+            <!-- Introduction text -->
+            <p class='text'>
+                Now its time to teach Geoerge! To begin George will ask how to pronounce a sound and it is up to you to pick the 
+                image that corresponds to that sound. 
+            </p>
+        </div>
+
+        <!-- Image with text box -->
+        <div class="container">
+
+
+            <!-- Image selection form -->
+            <div class= "image-grid">
+                <form id="imageForm" action="/check" method="post">
+                    <div class="image-row">
+                        <label>
+                            <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                            <img class="image" src="{{ url_for('static', filename='franchise_b.png') }}" alt="Image {{ i }}">
+                        </label>
+                        <label>
+                            <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                            <img class="image" src="{{ url_for('static', filename='franchise_i.png') }}" alt="Image {{ i }}">
+                        </label>
+                        <label>
+                            <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                            <img class="image" src="{{ url_for('static', filename='franchise_sh.png') }}" alt="Image {{ i }}">
+                        </label>
+                        <label>
+                            <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                            <img class="image" src="{{ url_for('static', filename='franchise_p.png') }}" alt="Image {{ i }}">
+                        </label>
+                    </div>
+                    <button id="submitButton" type="submit" disabled style="margin-left: 10px;">Submit</button>
+                </form>
+                <div class='right'>
+                    <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image" width="300" height="200">
+                    <div class="text-box">
+                        <p> How do you say /sh/?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>  
+            document.addEventListener('DOMContentLoaded', function() {
+                const images = document.querySelectorAll('.image');
+                const submitButton = document.getElementById('submitButton');
+
+                images.forEach(image => {
+                    image.addEventListener('click', function() {
+                        images.forEach(img => img.classList.remove('selected'));
+                        this.classList.add('selected');
+                        submitButton.disabled = false;
+                    });
+                });
+
+                submitButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const selectedImage = document.querySelector('.selected');
+                    if (selectedImage.src.includes('franchise_sh')) {
+                        alert('Correct image selected!');
+                        // Use fetch to send data to the server here
+                    } else {
+                        alert('Incorrect image selected. Please try again!');
+                        // Handle the incorrect selection here
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
+
+{% endblock %}

@@ -43,8 +43,12 @@
             <div class="left">
                 <p>
                     Welcome to the progress tracker! This is where you can see how George (and you!) is doing with his learning. 
-                    Every time you create a flashcard (matching a sound to an image), it will show up here.
+                    Every time you create a flashcard (matching a sound to an image), it will show up here. Once you have reviewed 
+                    the flash cards hit the link below to help goerge practice his sounds!
                 </p>
+                <form action="/games" method="get">
+                    <button type="submit">Go to Game</button>
+                </form>
                 <div class="image-grid">
                     {% for image in existing_images %}
                     <div class="image">
