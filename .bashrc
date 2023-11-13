@@ -1,3 +1,2 @@
-export API_KEY="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"
 
 
