@@ -13,17 +13,22 @@ import urllib.request
 from PIL import Image
 import matplotlib.pyplot as plt
 
+from stability_sdk import client
+import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
+
 import urllib.request
 import ssl
 import requests
 import os 
+import io
+import warnings
 
 from gtts import gTTS 
 
 order = ["sh","p","b","i"] #this needs to be updated as we introduce more letters 
 characters = []
 image_info = {'franchise_sh.png':' it says /sh/',
-                'franchise_p.png': " it says /p/",
+                'franchise_p.png':" it says /p/",
                 'franchise_b.png':' it says /b/',
                 'franchise_i.png':' it says /i/',
                 'franchise_logo.png':''}
@@ -32,7 +37,23 @@ image_info = {'franchise_sh.png':' it says /sh/',
 ssl._create_default_https_context = ssl._create_unverified_context
 
 views = Blueprint('views', __name__)
-openai.api_key = os.environ['API_KEY']
+
+os.environ['GPT_KEY'] = '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'
+ # openai.api_key = os.environ['API_KEY'] : this doesn't work on my computer, but it should work on yours
+
+os.environ['STABILITY_KEY'] = 'sk-rr1JnmVdLgOHz6IHaKx5wXAUza49ZnRvKcghatvAbumFO6DZ' #this should be done locally 
+openai.api_key = os.environ['GPT_KEY']
+
+api_key = os.environ['STABILITY_KEY']
+stability_api = client.StabilityInference(
+    key=api_key, # API Key reference.
+    verbose=True, # Print debug messages.
+    engine="stable-diffusion-xl-1024-v1-0", # Set the engine to use for generation.
+    # Check out the following link for a list of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
+)
+
+
+
 
 #generates 4 images for a given sound in a given franchise
 def generate_images(sound, prompt=0):
@@ -48,25 +69,28 @@ def generate_images(sound, prompt=0):
         botResponse = botResponse["choices"][0]["text"].strip()
         
 
-        response = openai.Image.create(
-            prompt= "Image of the " + current_user.franchise + " character " + botResponse,
-            n=4,
-            size="512x512"
-        )
+        answers = stability_api.generate(
+            prompt=botResponse,
+            steps=50, 
+            cfg_scale=8.0, 
+            width=1024, # Generation width, defaults to 512 if not included.
+            height=1024, # Generation height, defaults to 512 if not included.
+            samples=4, # Number of images to generate, defaults to 1 if not included.
+            sampler=generation.SAMPLER_K_DPMPP_2M # Set the sampling algorithm. Defaults to SAMPLER_K_DPP_2M if not included.
+        ) 
+        i = 0
+        for resp in answers:
+            for artifact in resp.artifacts:
+                if artifact.finish_reason == generation.FILTER:
+                    warnings.warn(
+                        "Your request activated the API's safety filters and could not be processed."
+                        "Please modify the prompt and try again.")
+                if artifact.type == generation.ARTIFACT_IMAGE:
+                            img = Image.open(io.BytesIO(artifact.binary))
+                img.save("website/static/franchise_"+sound+str(i)+".png")
+            i += 1
         
-        for i in range(0,4):
-            image_url = response['data'][i]['url']
-            print(image_url)
-            script_path = os.path.abspath(__file__)
-            print(f"The path to this script is: {script_path}")
-
-            image_response = requests.get(image_url)
-            if image_response.status_code == 200:
-                with open("website/static/franchise_" + str(sound) + str(i) + ".png", "wb") as image_file:
-                    image_file.write(image_response.content)
-
-            image_url = url_for('static', filename="franchise_sh"+str(i)+".png")
-        if prompt == 1:
+        if prompt == 1: #lets us return the prompt for testing purposes
             return botResponse
 
 
@@ -92,11 +116,12 @@ def home():
 @views.route('/intro_flow_1', methods=['GET', 'POST'])
 @login_required
 def intro_flow_1():
-    if request.method == 'POST':
-        if int(request.form['play']) == 1:
-            os.system("mpg321 welcome.mp3")
-        else:    
-            return render_template("intro_flow_1.html", user=current_user)
+    return render_template("intro_flow_1.html", user=current_user)
+
+@views.route('/intro_audio_1', methods=['GET', 'POST'])
+@login_required
+def intro_audio_1():
+    os.system("website/static/0.mp3")
     return render_template("intro_flow_1.html", user=current_user)
     
 
@@ -113,7 +138,7 @@ def intro_flow_2():
 
         # Query the User model to find the user by ID
         user = User.query.filter_by(id=current_user_id).first()
-        user.franchise=franchise
+        user.franchise = franchise
         db.session.commit()
 
         return redirect(url_for('views.intro_flow_3'))
@@ -134,38 +159,33 @@ def intro_flow_3():
     # Add the generative AI component
     yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
-    if not os.path.exists("website/static/franchise_logo.png"): #Checks to see if image already exists, if it exists does not regenerate 
-        botResponse = openai.Completion.create(
-            model="text-davinci-003",
+    if not os.path.exists("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/franchise_logo.png"): #Checks to see if image already exists, if it exists does not regenerate 
+
+        print(yourStory)
+
+        answers = stability_api.generate(
             prompt="A visual cartoon version of the " + yourStory + " franchise",
-            temperature=0.5,
-            max_tokens=120,
-            top_p=1.0,
-            frequency_penalty=0.8,
-            presence_penalty=0.0,
-        )
-        botResponse = botResponse["choices"][0]["text"].strip()
+            steps=50, 
+            cfg_scale=8.0, 
+            width=512, # Generation width, defaults to 512 if not included.
+            height=512, # Generation height, defaults to 512 if not included.
+            samples=1, # Number of images to generate, defaults to 1 if not included.
+            sampler=generation.SAMPLER_K_DPMPP_2M # Set the sampling algorithm. Defaults to SAMPLER_K_DPP_2M if not included.
+        ) 
+        for resp in answers:
+            for artifact in resp.artifacts:
+                if artifact.finish_reason == generation.FILTER:
+                    warnings.warn(
+                        "Your request activated the API's safety filters and could not be processed."
+                        "Please modify the prompt and try again.")
+                if artifact.type == generation.ARTIFACT_IMAGE:
+                            img = Image.open(io.BytesIO(artifact.binary))
+                img.save("website/static/franchise_logo.png")
 
-        response = openai.Image.create(
-            prompt=botResponse,
-            n=1,
-            size="512x512"
-        )
-        image_url = response['data'][0]['url']
-        print(image_url)
-        script_path = os.path.abspath(__file__)
-        print(f"The path to this script is: {script_path}")
 
-        image_response = requests.get(image_url)
-        if image_response.status_code == 200:
-            with open("website/static/franchise_logo.png", "wb") as image_file:
-                image_file.write(image_response.content)
-
-        image_url = url_for('static', filename='franchise_logo.png')
-
-        return render_template('intro_flow_3.html', user=current_user, franchise=franchise, image_url=image_url)
+        return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
     else:
-        return render_template('intro_flow_3.html', user=current_user, franchise=franchise, image_url=url_for('static', filename='franchise_logo.png'))
+        return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
 
 @views.route('/intro_flow_4', methods=['GET', 'POST'])
 @login_required
