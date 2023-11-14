@@ -46,9 +46,14 @@
 <body>
     <div class="container">
         <div class="left">
-            <p>
-                What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
-            </p>
+            <form action="/audio_2" method="post">
+                <p>
+                    What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
+                </p>
+                <button class="microphone-button" type="submit" name='play' value = '1'>
+                    <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                </button>    
+            </form>
  <form id="franchise-form" action="/intro_flow_2" method="POST">
     <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
     <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">

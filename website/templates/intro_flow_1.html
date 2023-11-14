@@ -40,39 +40,18 @@
                     height: auto; /* Maintain the aspect ratio of the images */
                     margin: 10px 0; /* Add some vertical spacing between images */
                 }
-                /* Add any necessary styling to the microphone button */
-                .microphone-button {
-                    background-color: #007bff; /* Blue color; you can change this to your desired color */
-                    color: #fff; /* Text color (white) */
-                    border: none; /* Remove button border */
-                    border-radius: 50%; /* Make it a circle */
-                    width: 20px; /* Adjust the size as needed */
-                    height: 20px; /* Adjust the size as needed */
-                    font-size: 10px; /* Font size of the microphone icon */
-                    cursor: pointer; /* Show pointer cursor on hover */
-                    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-                }
 
-                /* Style the microphone icon (Font Awesome) */
-                .microphone-button i {
-                    margin-top: 3x; /* Adjust the vertical position of the icon */
-                }
-
-                /* Hover effect (optional) */
-                .microphone-button:hover {
-                    background-color: #0056b3; /* Darker blue on hover */
-                }
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="left">
-                    <form action="/intro_audio_1" method="post"></form>    
+                    <form action="/intro_audio_1" method="post">   
                         <p>
                             Meet George, George is a 2nd grader struggling with how to pronounce certain words. George wants to know what movies or books series you like so he can learn from you about different letter sounds! Help George learn to read by selecting the characters that correspond to each part of the word. 
                             If you can't remember who a certain character represents, ask George; he is sure to know them all.
                             <button class="microphone-button" type="submit" name='play' value = '1'>
-                                <i class="fas fa-microphone"> </i> <!-- Font Awesome volume button icon -->
+                                <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
                             </button>    
                         </p>
                     </form>

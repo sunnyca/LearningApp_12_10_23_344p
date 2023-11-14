@@ -53,7 +53,7 @@
                     {% for image in existing_images %}
                     <div class="image">
                         <p>{{ image_info[image] }}</p>
-                        <img src="{{ url_for('static', filename=image) }}" alt="{{ image }}">
+                        <img src="{{ url_for('static', filename='franchise_' + image + '.png') }}" alt="{{ image }}">
                     </div>
                     {% endfor %}
                 </div>     
