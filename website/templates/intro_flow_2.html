@@ -40,8 +40,9 @@
             height: auto; /* Maintain the aspect ratio of the images */
             margin: 10px 0; /* Add some vertical spacing between images */
         }
+        /* Add styles for the loading animation */
+
     </style>
-</style>
 </head>
 <body>
     <div class="container">
@@ -50,24 +51,30 @@
                 <p>
                     What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
                 </p>
-                <button class="microphone-button" type="submit" name='play' value = '1'>
+                <button class="microphone-button" type="submit" name='play' value='1'>
                     <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
                 </button>    
             </form>
- <form id="franchise-form" action="/intro_flow_2" method="POST">
-    <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
-    <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
-        <button class="btn btn-primary" onclick="window.location.href='/intro_flow_3'">Continue</button>
-</form>
-
+            <form id="franchise-form" action="/intro_flow_2" method="POST" onsubmit="showLoading()">
+                <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
+                <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
+                <button class="btn btn-primary" type="submit">Continue</button>
+            </form>
+            <div id="loading" style="display: none; text-align: left;">
+                <div class="loader"></div>
+                <p>Loading...</p>
+            </div>
         </div>
         <div class="right">
             <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
         </div>
     </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
-
-
-
 {% endblock %}

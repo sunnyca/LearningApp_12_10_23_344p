@@ -1,7 +1,15 @@
 flask
 Flask-SQLAlchemy
 flask-login
-# flask_migrate
-# openai
-# Pillow
+flask_migrate
+openai
+Pillow
 Werkzeug==2.3.0
+stability_sdk
+playsound
+# python 3.9.7
+flask_login
+matplotlib
+requests
+gtts
+PyObjC

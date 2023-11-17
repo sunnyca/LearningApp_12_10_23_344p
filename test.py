@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 
-os.environ['GPT_KEY'] = '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'
+os.environ['GPT_KEY'] = ''
 client_1 = OpenAI(api_key=os.environ['GPT_KEY'])
 
 
