@@ -29,6 +29,7 @@ import warnings
 
 from gtts import gTTS 
 
+# region intro stuff 
 order = ["sh","p","b","i"] #this needs to be updated as we introduce more letters 
 # this keeps track of the characters that have been generated so far, could probably go into the database 
 # for the user but doing it locally now 
@@ -57,7 +58,7 @@ stability_api = client.StabilityInference(
     engine="stable-diffusion-xl-1024-v1-0", # Set the engine to use for generation.
     # Check out the following link for a list of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
 )
-
+# endregion
 
 
 
@@ -102,8 +103,9 @@ def generate_images(sound, prompt=0):
 
 def generate_all_images(local_order=order):
     for sound in local_order:
-        if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+"0.png"):
-            characters[sound] = generate_images(sound,1)
+        if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+".png"):
+            if not os.path.exists("website/static"+str(current_user.id)+"_"+sound+"0.png"):
+                characters[sound] = generate_images(sound,1)
 
 
 
@@ -118,14 +120,14 @@ def intro_flow_1():
 @views.route('/intro_audio_1', methods=['POST'])
 @login_required
 def intro_audio_1():
-    playsound("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/0.mp3")
+    playsound("website/static/sounds/1_sound.mp3")
     return render_template("intro_flow_1.html", user=current_user)
 
 #plays second audio clip, same caveat 
 @views.route('/audio_2', methods=['POST'])
 @login_required
 def audio_2():
-    playsound("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/1.mp3")
+    playsound("website/static/sounds/2_sound.mp3")
     return render_template("intro_flow_2.html", user=current_user)
 
 #plays third audio clip, same caveat
@@ -135,20 +137,20 @@ def audio_2():
 def audio_3():
     #checks to see if file has been generated 
     #could probably 
-    if not os.path.exists("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/3.mp3"):
+    if not os.path.exists("website/static/sounds/3_sound.mp3"):
         #uses openai to generate audio
-        client_2 = OpenAI()
+        client_2 = OpenAI(api_key=GPT_KEY)
         user = User.query.filter_by(id=current_user.id).first()
         response1 = client_2.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="You're ready to start learning with George! He is so excited to learn more about" +user.franchise+"! The next screen will help teach you letters using characters from " + user.franchise + "."
+        input="You're ready to start learning with George! He is so excited to learn more about" + user.franchise +"! The next screen will help teach you letters using characters from " + user.franchise + "."
         )
         #saves audio 
-        response1.stream_to_file("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/3.mp3")
+        response1.stream_to_file("website/static/sounds/3_sound.mp3")
     #plays audio 
-    playsound("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/3.mp3")
-    return render_template("intro_flow_3.html", user=current_user)
+    playsound("website/static/sounds/3_sound.mp3")
+    return render_template("intro_flow_3.html", user=current_user, id=str(current_user.id))
 
 #second screen of intro flow, asks for franchise name
 @views.route('/intro_flow_2', methods=['GET', 'POST'])
@@ -189,7 +191,7 @@ def intro_flow_3():
     yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
     #Checks to see if image already exists, if it exists does not regenerate 
-    if not os.path.exists("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/"+str(current_user.id)+"_logo.png"):
+    if not os.path.exists("website/static/"+str(current_user.id)+"_logo.png"):
         #included for testing 
         print(yourStory)
         #generates logo
@@ -345,6 +347,7 @@ def progress_tracker():
     print(characters)
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
     existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    print(existing_images)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
         image_info[image] = 'This is ' + characters[image] + image_info[image]
