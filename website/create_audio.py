@@ -3,6 +3,7 @@ from openai import OpenAI
 import openai
 import os
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+from api_keys import GPT_KEY, STABILITY_KEY
 
 create_audio = Blueprint('create_audio', __name__)
 
@@ -14,10 +15,9 @@ texts = ["Meet George, George is a 2nd grader struggling with how to pronounce c
         ,"buuuuuh"
         ,"ihhhhhh"
         ]
-os.environ['OPENAI_API_KEY'] = ''
 
 
-client = OpenAI()
+client = OpenAI(api_key=GPT_KEY)
 i = 0
 for text in texts:
     response1 = client.audio.speech.create(

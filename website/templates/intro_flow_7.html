@@ -53,25 +53,22 @@
                     </p>
                 </div>
                 <div>
-                    <form id="imageForm" action="/store_image_i" method="post" onsubmit="showLoading()">
+                    <form id="imageForm" action="/store_image_i" method="post">
                         <div class="image-row">
                             {% for i in range(0, 4) %}
                             <label>
                                 <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                                <img class="image" src="{{ url_for('static', filename='franchise_i' ~ i ~ '.png') }}" alt="Image {{ i }}">
+                                <img class="image" src="{{ url_for('static', filename=id+'_i' ~ i ~ '.png') }}" alt="Image {{ i }}">
                             </label>
                             {% endfor %}
                         </div>
                         <button id="submitButton" type="submit" disabled style="margin-left: 10px;">Submit</button>
                     </form>
-                                        div id="loading" style="display: none; text-align: left;">
-                <div class="loader"></div>
-                <p>Loading...</p>
-            </div>
+                </div>
                     <form id="regenerate" action="/regenerate" method="post" value="b" style="margin-left: 10px;"> <!-- Adding margin-left for spacing between buttons -->            
                         <button id="regenerateButton" type="submit" name = "sound" value="i">Regenerate</button>
                     </form>
-                </div>
+            </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         const images = document.querySelectorAll('.image');
@@ -86,7 +83,7 @@
                                 document.getElementById('submitButton').disabled = false;
 
                                 // AJAX POST request to send the selected image number to the server
-                                const selectedImage = this.getAttribute('src').match(/franchise_i(\d+)\.png/)[1];
+                                const selectedImage = this.getAttribute('src').match(new RegExp(id + '_i(\\d+)\\.png'))[1];
                                 fetch('/store_image', {
                                     method: 'POST',
                                     headers: {

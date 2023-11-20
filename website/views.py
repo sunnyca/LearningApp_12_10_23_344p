@@ -10,7 +10,7 @@ from flask import redirect
 from flask import url_for
 from openai import OpenAI
 
-
+from api_keys import GPT_KEY, STABILITY_KEY
 
 import urllib.request
 from PIL import Image
@@ -32,34 +32,32 @@ from gtts import gTTS
 order = ["sh","p","b","i"] #this needs to be updated as we introduce more letters 
 # this keeps track of the characters that have been generated so far, could probably go into the database 
 # for the user but doing it locally now 
-characters = {'sh':'',
-              'p':'',
-              'b':'',
-              'i':'',
-              'logo':" "}
+characters = {'sh':"",
+                'p':"",
+                'b':"",
+                'i':"",
+                'logo':""}        
+
+extended_order = ["sh","p","b","i","mm","t","d","n","k","g","ng","s","z","f","v","L","3","ch","d3","j","w","h","a","ei","ea","I"]
 
 #IMPORTANT OR ELSE WE CANNOT MAKE THIS WORK 
 ssl._create_default_https_context = ssl._create_unverified_context
 
 views = Blueprint('views', __name__)
 
-#os.environ['GPT_KEY'] = 
-client_1 = OpenAI(api_key='')
-# openai.api_key = os.environ['API_KEY'] : this doesn't work on my computer, but it should work on yours
+
+client_1 = OpenAI(api_key=GPT_KEY)
 
 
 #initialize the stability api
-os.environ['STABILITY_KEY'] =  #this should be done locally 
-
-#initialize the stability api
-api_key = os.environ['STABILITY_KEY']
 
 stability_api = client.StabilityInference(
-    key=api_key, # API Key reference.
+    key=STABILITY_KEY, # API Key reference.
     verbose=True, # Print debug messages.
     engine="stable-diffusion-xl-1024-v1-0", # Set the engine to use for generation.
     # Check out the following link for a list of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
 )
+
 
 
 
@@ -77,7 +75,7 @@ def generate_images(sound, prompt=0):
         
         #uses stability to generate images
         answers = stability_api.generate(
-            prompt=botResponse,
+            prompt="a drawn image of " + botResponse +"from the " + current_user.franchise + " franchise",
             steps=50, 
             cfg_scale=8.0, 
             width=1024, # Generation width, defaults to 512 if not included.
@@ -95,14 +93,17 @@ def generate_images(sound, prompt=0):
                         "Please modify the prompt and try again.")
                 if artifact.type == generation.ARTIFACT_IMAGE:
                             img = Image.open(io.BytesIO(artifact.binary))
-                img.save("website/static/franchise_"+sound+str(i)+".png")
+                img.save("website/static/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
             i += 1
         
         if prompt == 1: #lets us return the prompt for testing purposes
             return botResponse
 
 
-
+def generate_all_images(local_order=order):
+    for sound in local_order:
+        if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+"0.png"):
+            characters[sound] = generate_images(sound,1)
 
 
 
@@ -117,14 +118,14 @@ def intro_flow_1():
 @views.route('/intro_audio_1', methods=['POST'])
 @login_required
 def intro_audio_1():
-    playsound("website/static/0.mp3")
+    playsound("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/0.mp3")
     return render_template("intro_flow_1.html", user=current_user)
 
 #plays second audio clip, same caveat 
 @views.route('/audio_2', methods=['POST'])
 @login_required
 def audio_2():
-    playsound("website/static/1.mp3")
+    playsound("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/1.mp3")
     return render_template("intro_flow_2.html", user=current_user)
 
 #plays third audio clip, same caveat
@@ -134,7 +135,7 @@ def audio_2():
 def audio_3():
     #checks to see if file has been generated 
     #could probably 
-    if not os.path.exists("website/static/7.mp3"):
+    if not os.path.exists("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/3.mp3"):
         #uses openai to generate audio
         client_2 = OpenAI()
         user = User.query.filter_by(id=current_user.id).first()
@@ -144,31 +145,10 @@ def audio_3():
         input="You're ready to start learning with George! He is so excited to learn more about" +user.franchise+"! The next screen will help teach you letters using characters from " + user.franchise + "."
         )
         #saves audio 
-        response1.stream_to_file("website/static/7.mp3")
+        response1.stream_to_file("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/3.mp3")
     #plays audio 
-    playsound("website/static/7.mp3")
+    playsound("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/3.mp3")
     return render_template("intro_flow_3.html", user=current_user)
-
-@views.route('/audio_sh', methods=['POST'])
-def audio_sh(): # SH
-    playsound("website/static/3.mp3")
-    return progress_tracker()
-
-@views.route('/audio_p', methods=['POST'])
-def audio_p(): # P
-    playsound("website/static/4.mp3")
-    return progress_tracker()
-
-@views.route('/audio_b', methods=['POST'])
-def audio_b(): # B
-    playsound("website/static/5.mp3")
-    return progress_tracker()
-
-@views.route('/audio_i', methods=['POST'])
-def audio_i(): # IH
-    playsound("website/static/6.mp3")
-    return progress_tracker()
-
 
 #second screen of intro flow, asks for franchise name
 @views.route('/intro_flow_2', methods=['GET', 'POST'])
@@ -209,8 +189,7 @@ def intro_flow_3():
     yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
     #Checks to see if image already exists, if it exists does not regenerate 
-    ## do not update the below line to be local - it is on purpose not matching!! 
-    if not os.path.exists("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/franchise_logo.png"):
+    if not os.path.exists("/Users/keeganharkavy/Desktop/Code/LearningApp/website/static/"+str(current_user.id)+"_logo.png"):
         #included for testing 
         print(yourStory)
         #generates logo
@@ -232,22 +211,20 @@ def intro_flow_3():
                         "Please modify the prompt and try again.")
                 if artifact.type == generation.ARTIFACT_IMAGE:
                             img = Image.open(io.BytesIO(artifact.binary))
-                img.save("website/static/franchise_logo.png")
-
-
-        return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
+                img.save("website/static/franchise"+str(current_user.id)+"_logo.png")
+        generate_all_images(order) #generates and stores all images in order list
+        return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
     else:
-        return render_template('intro_flow_3.html', user=current_user, franchise=franchise)
+        generate_all_images(order) #generates and stores all images in order list 
+        return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
 
 #fourth screen of intro flow, generates images for sh sound 
 @views.route('/intro_flow_4', methods=['GET', 'POST'])
 @login_required
 def intro_flow_4():
     #Checks to see if image already exists, if it exists skips to next sound 
-    if not os.path.exists("website/static/franchise_sh.png"): 
-        character = generate_images("sh",1)
-        characters['sh']= character
-        return render_template("intro_flow_4.html", user=current_user,character=character)
+    if not os.path.exists("website/static/"+str(current_user.id)+"_sh.png"): 
+        return render_template("intro_flow_4.html", user=current_user,character=characters['sh'], id=str(current_user.id))
     else:
         return store_image_1()
 
@@ -281,15 +258,14 @@ def store_image_1():
         #if from button removes all but selected image and then renames selected image to franchise_sh.png
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if i != selected_image:
-                os.remove("website/static/franchise_sh"+str(i)+".png")
-            else:
-                os.rename("website/static/franchise_sh"+str(i)+".png", "website/static/franchise_sh.png")
+            if os.path.exists("website/static/"+str(current_user.id)+"_sh"+str(i)+".png"):
+                if i != selected_image:
+                        os.remove("website/static/"+str(current_user.id)+"_sh"+str(i)+".png")
+                else:
+                    os.rename("website/static/"+str(current_user.id)+"_sh"+str(i)+".png", "website/static/"+str(current_user.id)+"_sh.png")
     #checks to see if next sound exists already, if not generates images for next sound
-    if not os.path.exists("website/static/franchise_p.png"):
-        character = generate_images('p',1)
-        characters["p"] = (character)
-        return render_template("intro_flow_5.html", user=current_user,character=character)
+    if not os.path.exists("website/static/"+str(current_user.id)+"_p.png"): 
+        return render_template("intro_flow_5.html", user=current_user,character=characters['p'], id=str(current_user.id))
     #if next sound exists skips to next sound
     else:
         return store_image_2()
@@ -301,14 +277,13 @@ def store_image_2():
     if request.method == 'POST':
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if i-1 != selected_image:
-                os.remove("website/static/franchise_p"+str(i)+".png")
-            else:
-                os.rename("website/static/franchise_p"+str(i)+".png", "website/static/franchise_p.png") #renames the selected image to franchise_p.png
-    if not os.path.exists("website/static/franchise_b.png"): 
-        character = generate_images('b',1)
-        characters['b']=(character)
-        return render_template("intro_flow_6.html", user=current_user,character=character)
+            if os.path.exists("website/static/"+str(current_user.id)+"_p"+str(i)+".png"):
+                if i-1 != selected_image:
+                    os.remove("website/static/"+str(current_user.id)+"_p"+str(i)+".png")
+                else:
+                    os.rename("website/static/"+str(current_user.id)+"_p"+str(i)+".png", "website/static/"+str(current_user.id)+"_p.png") #renames the selected image to franchise_p.png
+    if not os.path.exists("website/static/"+str(current_user.id)+"_b.png"): 
+        return render_template("intro_flow_6.html", user=current_user,character=characters, id=str(current_user.id))
     else: 
         return store_image_3()
 
@@ -319,14 +294,13 @@ def store_image_3():
     if request.method == 'POST':
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if i != selected_image:
-                os.remove("website/static/franchise_b"+str(i)+".png")
-            else:
-                os.rename("website/static/franchise_b"+str(i)+".png", "website/static/franchise_b.png")
-    if not os.path.exists("website/static/franchise_i.png"): 
-        character = generate_images('i',1)
-        characters['i']=(character)
-        return render_template("intro_flow_7.html", user=current_user,character=character)
+            if os.path.exists("website/static/"+str(current_user.id)+"_b"+str(i)+".png"):
+                if i != selected_image:
+                    os.remove("website/static/"+str(current_user.id)+"_b"+str(i)+".png")
+                else:
+                    os.rename("website/static/"+str(current_user.id)+"_b"+str(i)+".png", "website/static/"+str(current_user.id)+"_b.png")
+    if not os.path.exists("website/static/"+str(current_user.id)+"_i.png"): 
+        return render_template("intro_flow_7.html", user=current_user,character=characters['i'], id=str(current_user.id))
     else:
         return store_image_i()
 
@@ -337,10 +311,11 @@ def store_image_i():
     if request.method == 'POST':
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if i != selected_image:
-                os.remove("website/static/franchise_i"+str(i)+".png")
-            else:
-                os.rename("website/static/franchise_i"+str(i)+".png", "website/static/franchise_i.png")
+            if os.path.exists("website/static/"+str(current_user.id)+"_i"+str(i)+".png"):
+                if i != selected_image:
+                    os.remove("website/static/"+str(current_user.id)+"_i"+str(i)+".png")
+                else:
+                    os.rename("website/static/"+str(current_user.id)+"_i"+str(i)+".png", "website/static/"+str(current_user.id)+"_i.png")
         return progress_tracker()
     else:
         return progress_tracker()
@@ -362,41 +337,25 @@ def games():
 @login_required
 def progress_tracker():
     #created so we can find each image and its corresponding character
-
-    #keeping this logic, but commentated out in case we want it in the future
     image_info = {'sh':' they says /sh/',
                 'p':" they says /p/",
                 'b':' they says /b/',
                 'i':' they says /i/',
                 'logo':'your franchise logo!'}
     print(characters)
-
-
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
-    existing_images = [image for image in image_info if os.path.exists(f"website/static/franchise_{image}.png")]
-
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
         image_info[image] = 'This is ' + characters[image] + image_info[image]
     #returns enough information to display the images and their corresponding characters
-    return render_template("progress_tracker.html", user=current_user,existing_images=existing_images,image_info=image_info)
+    return render_template("progress_tracker.html", user=current_user,existing_images=existing_images,image_info=image_info, id=str(current_user.id))
 
 
 #legacy code from template 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    if request.method == 'POST': 
-        note = request.form.get('note')#Gets the note from the HTML 
-
-        if len(note) < 1:
-            flash('Note is too short!', category='error') 
-        else:
-            new_note = Note(data=note, user_id=current_user.id)  #providing the schema for the note 
-            db.session.add(new_note) #adding the note to the database 
-            db.session.commit()
-            flash('Note added!', category='success')
-
     return render_template("home.html", user=current_user)
 
 #more legacy code 
