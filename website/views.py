@@ -115,43 +115,6 @@ def generate_all_images(local_order=order):
 def intro_flow_1():
     return render_template("intro_flow_1.html", user=current_user)
 
-#plays audio for first clip 
-#audio plays continously once clicked, even when continueing through app 
-@views.route('/intro_audio_1', methods=['POST'])
-@login_required
-def intro_audio_1():
-    playsound("website/static/sounds/1_sound.mp3")
-    return render_template("intro_flow_1.html", user=current_user)
-
-#plays second audio clip, same caveat 
-@views.route('/audio_2', methods=['POST'])
-@login_required
-def audio_2():
-    playsound("website/static/sounds/2_sound.mp3")
-    return render_template("intro_flow_2.html", user=current_user)
-
-#plays third audio clip, same caveat
-# this one is slower cause we need to generate including franchise name, so can't do when site is first loaded 
-@views.route('/audio_3', methods=['POST'])
-@login_required
-def audio_3():
-    #checks to see if file has been generated 
-    #could probably 
-    if not os.path.exists("website/static/sounds/3_sound.mp3"):
-        #uses openai to generate audio
-        client_2 = OpenAI(api_key=GPT_KEY)
-        user = User.query.filter_by(id=current_user.id).first()
-        response1 = client_2.audio.speech.create(
-        model="tts-1",
-        voice="alloy",
-        input="You're ready to start learning with George! He is so excited to learn more about" + user.franchise +"! The next screen will help teach you letters using characters from " + user.franchise + "."
-        )
-        #saves audio 
-        response1.stream_to_file("website/static/sounds/3_sound.mp3")
-    #plays audio 
-    playsound("website/static/sounds/3_sound.mp3")
-    return render_template("intro_flow_3.html", user=current_user, id=str(current_user.id))
-
 #second screen of intro flow, asks for franchise name
 @views.route('/intro_flow_2', methods=['GET', 'POST'])
 @login_required
@@ -159,7 +122,18 @@ def intro_flow_2():
     current_user_id = current_user.id
     #skips this screen if user already has a franchise 
     if current_user.franchise != None:
+        #uses openai to generate audio for next screen using franchise name
+        client_2 = OpenAI(api_key=GPT_KEY)
+        user = User.query.filter_by(id=current_user.id).first()
+        response1 = client_2.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input="You're ready to start learning with George! He is so excited to learn more about" + user.franchise +"! The next screen will help teach you letters using characters from " + user.franchise + "."
+            )
+        #saves audio 
+        response1.stream_to_file("website/static/sounds/3_sound.mp3")
         return redirect(url_for('views.intro_flow_3'))
+    
     #else asks for franchise name and stores it in database
     elif request.method == 'POST':
         print(request.form)
@@ -170,6 +144,17 @@ def intro_flow_2():
         user = User.query.filter_by(id=current_user_id).first()
         user.franchise = franchise
         db.session.commit()
+
+        #uses openai to generate audio for next screen using franchise name
+        client_2 = OpenAI(api_key=GPT_KEY)
+        user = User.query.filter_by(id=current_user.id).first()
+        response1 = client_2.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input="You're ready to start learning with George! He is so excited to learn more about" + user.franchise +"! The next screen will help teach you letters using characters from " + user.franchise + "."
+            )
+        #saves audio 
+        response1.stream_to_file("website/static/sounds/3_sound.mp3")
 
         return redirect(url_for('views.intro_flow_3'))
     else: 
@@ -191,7 +176,7 @@ def intro_flow_3():
     yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
     #Checks to see if image already exists, if it exists does not regenerate 
-    if not os.path.exists("website/static/"+str(current_user.id)+"_logo.png"):
+    if not os.path.exists("website/static/franchise"+str(current_user.id)+"_logo.png"):
         #included for testing 
         print(yourStory)
         #generates logo

@@ -46,22 +46,24 @@
         <body>
             <div class="container">
                 <div class="left">
-                    <form action="/intro_audio_1" method="post">   
-                        <p>
-                            Meet George, George is a 2nd grader struggling with how to pronounce certain words. George wants to know what movies or books series you like so he can learn from you about different letter sounds! Help George learn to read by selecting the characters that correspond to each part of the word. 
-                            If you can't remember who a certain character represents, ask George; he is sure to know them all.
-                            <button class="microphone-button" type="submit" name='play' value = '1'>
-                                <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
-                            </button>    
-                        </p>
-                    </form>
+                    <p>
+                        Meet George, George is a 2nd grader struggling with how to pronounce certain words. George wants to know what movies or books series you like so he can learn from you about different letter sounds! Help George learn to read by selecting the characters that correspond to each part of the word.
+                        If you can't remember who a certain character represents, ask George; he is sure to know them all.
+                        <!-- Remove the form tag, as we don't need to submit a form for this -->
+                        <button class="microphone-button" onclick="toggleAudio()">
+                            <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                        </button>
+                    </p>
                     <!-- Button with an id for reference -->
                     <button class="btn btn-primary" onclick="window.location.href='/intro_flow_2'">Continue</button>
                 </div>
                 <div class="right">
                     <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
                 </div>
-            </div>
+            </div> 
+            <script>
+                var audio = new Audio("{{ url_for('static', filename='/sounds/1_sound.mp3') }}");
+            </script>
 
         
         </body>
