@@ -102,8 +102,9 @@ def generate_images(sound, prompt=0):
 
 def generate_all_images(local_order=order):
     for sound in local_order:
-        if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+"0.png"):
-            characters[sound] = generate_images(sound,1)
+        if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+".png"):
+            if not os.path.exists("website/static"+str(current_user.id)+"_"+sound+"0.png"):
+                characters[sound] = generate_images(sound,1)
 
 
 
