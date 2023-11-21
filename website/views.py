@@ -330,7 +330,22 @@ def store_image_i():
 @views.route('/games', methods=['GET', 'POST'])
 @login_required
 def games():
-    return render_template("games.html", user=current_user)
+    image_info = {'sh':' they says /sh/',
+                'p':" they says /p/",
+                'b':' they says /b/',
+                'i':' they says /i/',
+                'logo':'your franchise logo!'}
+    print(characters)
+    #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    print(existing_images)
+    #loops through each key and updates image_info to say what we want to display
+    for image in existing_images:
+        image_info[image] = 'This is ' + characters[image] + image_info[image]
+
+    return render_template("games.html", user=current_user,existing_images=existing_images,image_info=image_info, id=str(current_user.id))
+
+
 
 
 
