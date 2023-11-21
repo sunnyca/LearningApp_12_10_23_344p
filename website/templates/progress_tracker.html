@@ -47,12 +47,16 @@
                     the flash cards hit the link below to help George practice his sounds! If you forget what sound goes with which image,
                     just click on the image below! 
                 </p>
+                <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                    <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                </button>    
                 <form action="/games" method="get">
                     <button type="submit">Go to Game</button>
                 </form>
                 <div class="image-grid">
                     {% for image in existing_images %}
                     <div class="image">
+                        <p>{{ image_info[image] }}</p>
                         <button class="photo-button" type="submit" name='play' value='1', onclick="playSounds('{{image}}')">
                         <img src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ image }}">
                         </button>    
@@ -61,9 +65,11 @@
                 </div>     
             </div>
 
-            <audio id="sound" src="{{ url_for('static', filename='sounds/4_sound.mp3') }}"></audio>
+            <audio id="sound" src="{{ url_for('static', filename='sounds/3_sound.mp3') }}"></audio>
 
             <script>
+                var audio = new Audio("{{ url_for('static', filename='/sounds/6_sound.mp3') }}");
+
                 function playSounds(sound_1) {
 
                     sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';

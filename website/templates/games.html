@@ -51,12 +51,18 @@
 </head>
 <body>
 
-    <div class="container">
-        <!-- Introduction text -->
-        <p class='text'>
-            Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the 
-            image that corresponds to that sound. 
-        </p>
+
+    <div>
+        <div>
+            <!-- Introduction text -->
+            <p class='text'>
+                Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the 
+                image that corresponds to that sound. 
+            </p>
+            <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+            </button>  
+        </div>
 
         <!-- Image with text box -->
         <div class="image-grid">
@@ -87,7 +93,9 @@
 
     <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
 
+
     <script>
+        var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
         document.addEventListener('DOMContentLoaded', function () {
             const images = document.querySelectorAll('.image');
             const submitButton = document.getElementById('submitButton');

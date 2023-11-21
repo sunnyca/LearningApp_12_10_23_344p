@@ -45,7 +45,9 @@
                         matches the sound displayed. If none of them are good, click regenerate to get a new set of images. Once you have clicked 
                         on an image, the flash card will be created. You can check out all created flashcards in the Progress Tracker tab. 
                     </p>
-
+                    <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                        <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                    </button>  
                 </div>
                 <div>
                     <p class='text'>
@@ -74,6 +76,7 @@
                     </form>
             </div>
                 <script>
+                    var audio = new Audio("{{ url_for('static', filename='/sounds/5_sound.mp3') }}");
                     document.addEventListener('DOMContentLoaded', function() {
                         const images = document.querySelectorAll('.image');
 

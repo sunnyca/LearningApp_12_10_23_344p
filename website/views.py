@@ -37,8 +37,16 @@ characters = {'sh':"",
                 'p':"",
                 'b':"",
                 'i':"",
-                'logo':""}        
-
+                'logo':""}     
+image_info = {'sh':' they says /sh/',
+            'p':" they says /p/",
+            'b':' they says /b/',
+            'i':' they says /i/',
+            'logo':'your franchise logo!'}   
+texts ={'character_sh':"shhhhhhhhhhhh",
+        "character_p":"puhhh puhhh puhhh",
+        "character_b":"buuuuuh",
+        "character_i":"ihhhhhh"}
 extended_order = ["sh","p","b","i","mm","t","d","n","k","g","ng","s","z","f","v","L","3","ch","d3","j","w","h","a","ei","ea","I"]
 
 #IMPORTANT OR ELSE WE CANNOT MAKE THIS WORK 
@@ -73,10 +81,21 @@ def generate_images(sound, prompt=0):
         frequency_penalty=0.8,
         presence_penalty=0.0)
         botResponse = botResponse.choices[0].text.lstrip()
+         
+        botResponse_2 = client_1.completions.create(model="text-davinci-003",
+        prompt= "create a text desciption that when fed into the stability api will generate an image of " + botResponse +"from " + current_user.franchise + "make sure it is appropiate for children of all ages, keep it short",
+        temperature=0.5,
+        max_tokens=120,
+        top_p=1.0,
+        frequency_penalty=0.8,
+        presence_penalty=0.0)
+        botResponse_2 = botResponse_2.choices[0].text.lstrip()
+        
+        print(botResponse_2)
         
         #uses stability to generate images
         answers = stability_api.generate(
-            prompt="a drawn image of " + botResponse +"from the " + current_user.franchise + " franchise",
+            prompt=botResponse_2,
             steps=50, 
             cfg_scale=8.0, 
             width=1024, # Generation width, defaults to 512 if not included.
@@ -102,10 +121,41 @@ def generate_images(sound, prompt=0):
 
 
 def generate_all_images(local_order=order):
+    user = User.query.filter_by(id=current_user.id).first()
+    print(user.character)
+    characters_2 = {}
+
+    # Check if user.character is not empty
+    if user.character:
+        characters_2 = user.character.copy()
+
     for sound in local_order:
         if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+".png"):
             if not os.path.exists("website/static"+str(current_user.id)+"_"+sound+"0.png"):
-                characters[sound] = generate_images(sound,1)
+                chara = generate_images(sound,1)
+                print(chara)
+                print(sound)
+                characters_2[sound] = chara
+
+    user.character = characters_2            
+    db.session.commit()            
+    print(user.character)
+                
+def generate_audio():
+    #uses openai to generate audio for next screen using franchise name
+    client_2 = OpenAI(api_key=GPT_KEY)
+    user = User.query.filter_by(id=current_user.id).first()
+    for sound in order:
+        if not os.path.exists("website/static/sounds/"+sound+"_sound.mp3"):
+            response1 = client_2.audio.speech.create(
+                model="tts-1",
+                voice="alloy",
+                input="This is " + user.character[sound] + "it says" + texts[sound]
+                )
+            #saves audio 
+            response1.stream_to_file("website/static/sounds/character"+sound+"_sound.mp3")
+    
+
 
 
 
@@ -181,7 +231,7 @@ def intro_flow_3():
         print(yourStory)
         #generates logo
         answers = stability_api.generate(
-            prompt="A visual cartoon version of the " + yourStory + " franchise",
+            prompt="A visual cartoon logo of the " + yourStory + " franchise, no words",
             steps=50, 
             cfg_scale=8.0, 
             width=512, # Generation width, defaults to 512 if not included.
@@ -200,9 +250,11 @@ def intro_flow_3():
                             img = Image.open(io.BytesIO(artifact.binary))
                 img.save("website/static/franchise"+str(current_user.id)+"_logo.png")
         generate_all_images(order) #generates and stores all images in order list
+        generate_audio() #generates audio for next screen
         return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
     else:
         generate_all_images(order) #generates and stores all images in order list 
+        generate_audio() #generates audio for next screen
         return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
 
 #fourth screen of intro flow, generates images for sh sound 
@@ -211,7 +263,7 @@ def intro_flow_3():
 def intro_flow_4():
     #Checks to see if image already exists, if it exists skips to next sound 
     if not os.path.exists("website/static/"+str(current_user.id)+"_sh.png"): 
-        return render_template("intro_flow_4.html", user=current_user,character=characters['sh'], id=str(current_user.id))
+        return render_template("intro_flow_4.html", user=current_user,character=current_user.character['sh'], id=str(current_user.id))
     else:
         return store_image_1()
 
@@ -252,7 +304,7 @@ def store_image_1():
                     os.rename("website/static/"+str(current_user.id)+"_sh"+str(i)+".png", "website/static/"+str(current_user.id)+"_sh.png")
     #checks to see if next sound exists already, if not generates images for next sound
     if not os.path.exists("website/static/"+str(current_user.id)+"_p.png"): 
-        return render_template("intro_flow_5.html", user=current_user,character=characters['p'], id=str(current_user.id))
+        return render_template("intro_flow_5.html", user=current_user,character=current_user.character['p'], id=str(current_user.id))
     #if next sound exists skips to next sound
     else:
         return store_image_2()
@@ -270,7 +322,7 @@ def store_image_2():
                 else:
                     os.rename("website/static/"+str(current_user.id)+"_p"+str(i)+".png", "website/static/"+str(current_user.id)+"_p.png") #renames the selected image to franchise_p.png
     if not os.path.exists("website/static/"+str(current_user.id)+"_b.png"): 
-        return render_template("intro_flow_6.html", user=current_user,character=characters, id=str(current_user.id))
+        return render_template("intro_flow_6.html", user=current_user,character=current_user.character, id=str(current_user.id))
     else: 
         return store_image_3()
 
@@ -287,7 +339,7 @@ def store_image_3():
                 else:
                     os.rename("website/static/"+str(current_user.id)+"_b"+str(i)+".png", "website/static/"+str(current_user.id)+"_b.png")
     if not os.path.exists("website/static/"+str(current_user.id)+"_i.png"): 
-        return render_template("intro_flow_7.html", user=current_user,character=characters['i'], id=str(current_user.id))
+        return render_template("intro_flow_7.html", user=current_user,character=current_user.character['i'], id=str(current_user.id))
     else:
         return store_image_i()
 
@@ -315,18 +367,12 @@ def store_image_i():
 @views.route('/games', methods=['GET', 'POST'])
 @login_required
 def games():
-    image_info = {'sh':' they says /sh/',
-                'p':" they says /p/",
-                'b':' they says /b/',
-                'i':' they says /i/',
-                'logo':'your franchise logo!'}
-    print(characters)
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
     existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
     print(existing_images)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
-        image_info[image] = 'This is ' + characters[image] + image_info[image]
+        image_info[image] = 'This is ' + current_user.character[image] + image_info[image]
 
     return render_template("games.html", user=current_user,existing_images=existing_images,image_info=image_info, id=str(current_user.id))
 
@@ -338,19 +384,20 @@ def games():
 @views.route('/progress_tracker', methods=['GET', 'POST'])
 @login_required
 def progress_tracker():
+    user = User.query.filter_by(id=current_user.id).first()
     #created so we can find each image and its corresponding character
-    image_info = {'sh':' they says /sh/',
-                'p':" they says /p/",
-                'b':' they says /b/',
-                'i':' they says /i/',
+    image_info = {'sh':' it says /sh/',
+                'p':" it says /p/",
+                'b':' it says /b/',
+                'i':' it says /i/',
                 'logo':'your franchise logo!'}
-    print(characters)
+    
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
     existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
-    print(existing_images)
+    print(user.character)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
-        image_info[image] = 'This is ' + characters[image] + image_info[image]
+        image_info[image] = 'This is ' + user.character[image] + image_info[image]
     #returns enough information to display the images and their corresponding characters
     return render_template("progress_tracker.html", user=current_user,existing_images=existing_images,image_info=image_info, id=str(current_user.id))
 
