@@ -55,14 +55,29 @@
                         </button>
                     </p>
                     <!-- Button with an id for reference -->
-                    <button class="btn btn-primary" onclick="window.location.href='/intro_flow_2'">Continue</button>
+                    <button class="btn btn-primary" onclick="performActions()">Continue</button>
                 </div>
                 <div class="right">
                     <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
                 </div>
             </div> 
+            <div id="loading" style="display: none; text-align: left;">
+                <div class="loader"></div>
+                <p>Loading...Be Patient!</p>
+            </div>
             <script>
                 var audio = new Audio("{{ url_for('static', filename='/sounds/1_sound.mp3') }}");
+                function showLoading() {
+                    document.getElementById('loading').style.display = 'block';
+                }   
+                function performActions() {
+                    // First action
+                    showLoading();
+
+                    // Second action
+                    window.location.href = '/intro_flow_2';
+
+                }
             </script>
 
         
