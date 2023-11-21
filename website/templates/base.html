@@ -158,6 +158,17 @@
     window.location.href = "/";
   });
   }
+  function toggleAudio() {
+                    // Check if audio is currently playing
+                    if (audio.paused) {
+                        // If paused, play the audio
+                        audio.play();
+                    } else {
+                        // If playing, pause and reset to the beginning
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                }
 </script>
 {% endblock %}
   </body>

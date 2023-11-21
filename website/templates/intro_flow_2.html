@@ -51,7 +51,7 @@
                 <p>
                     What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
                 </p>
-                <button class="microphone-button" type="submit" name='play' value='1'>
+                <button class="microphone-button" type="submit" onclick="toggleAudio()">
                     <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
                 </button>    
             </form>
@@ -74,6 +74,7 @@
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
         }
+        var audio = new Audio("{{ url_for('static', filename='/sounds/2_sound.mp3') }}");
     </script>
 </body>
 </html>

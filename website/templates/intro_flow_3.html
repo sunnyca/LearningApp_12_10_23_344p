@@ -47,16 +47,15 @@
 
             <div class="container">
                 <div class="left">
-                    <form action="/audio_3" method="post">
-                        <p>
-                            You're ready to start learning with George! He is so excited to learn more about {{user.franchise}}! 
-                            The next screen will help teach you letters using characters from {{user.franchise}}.
-    
-                        </p>
-                        <button class="microphone-button" type="submit" name='play' value = '1'>
-                            <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
-                        </button>    
-                    </form>
+                    <p>
+                        You're ready to start learning with George! He is so excited to learn more about {{user.franchise}}! 
+                        The next screen will help teach you letters using characters from {{user.franchise}}.
+
+                    </p>
+                    <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                        <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                    </button>    
+ 
 
                     <!-- Above needs to be updated to actually reference what was in the box! -->
                     <!-- Button with an id for reference -->
@@ -67,7 +66,11 @@
                 </div>
             </div>
 
-        
+        <script>
+            var audio = new Audio("{{ url_for('static', filename='/sounds/3_sound.mp3') }}");
+        </script>    
+
+
         </body>
         </html>
     
