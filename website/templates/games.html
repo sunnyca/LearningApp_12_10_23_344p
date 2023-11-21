@@ -1,31 +1,28 @@
 {% extends "intro_flow_2.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-
 <html>
 <head>
     <title>Meet George</title>
 
     <style>
         .container {
-            position: center;
-            display: inline-block;
+            text-align: center;
         }
+
         .text-box {
-            position: absolute;
             background-color: white;
-            border: 1px solid #ccc;
             border-radius: 5px;
             padding: 10px;
-            display: block;
-            z-index: 1;
         }
+
         .image-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             justify-content: space-around;
         }
+
         .image {
             width: 200px; /* Adjust the width of the images */
             height: auto; /* Maintain aspect ratio */
@@ -33,21 +30,27 @@
             cursor: pointer; /* Change cursor to pointer */
             transition: border 0.3s; /* Add a smooth transition effect */
         }
+
         .selected {
             border: 2px solid blue; /* Highlight color for selected images */
         }
-        .text {
-            text-align: center;
-            margin-top: 20px;
-        }
-        #shuffleButton {
+
+        .btn-primary {
             margin-top: 10px;
-            padding: 5px 10px;
+            padding: 15px 30px; /* Adjust padding for larger button */
             cursor: pointer;
+            font-size: 16px; /* Adjust font size */
+        }
+
+        #score {
+            margin-top: 10px;
+            font-size: 18px;
+            color: green;
         }
     </style>
 </head>
 <body>
+
 
     <div>
         <div>
@@ -62,85 +65,93 @@
         </div>
 
         <!-- Image with text box -->
-        <div class="container">
-            <!-- Image selection form -->
-            <div class="image-grid">
-                <form id="imageForm" action="/check" method="post">
-                    <div class="image-row">
-                        {% for image in existing_images %}
-                            <label>
-                                <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                                <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
-                            </label>
-                        {% endfor %}
-                    </div>
-                    <button id="submitButton" class="btn btn-primary" type="submit" disabled style="margin-left: 10px;">Submit</button>
-                </form>
-                <div class='right'>
-                    <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
-                    <div class="text-box">
-                        <!-- Dynamic letter -->
-                        <p>How do you say /<span id="dynamicLetter">sh</span>/?</p>
-                        <!-- Shuffle button -->
-                        <button id="shuffleButton" class="btn btn-primary">Shuffle Letters</button>
-                    </div>
+        <div class="image-grid">
+            <form id="imageForm" action="/check" method="post">
+                <div class="image-row">
+                    {% for image in existing_images %}
+                        <label>
+                            <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                            <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
+                        </label>
+                    {% endfor %}
+                </div>
+                <button id="submitButton" class="btn btn-primary" type="submit" disabled style="margin-top: 10px;">Submit</button>
+            </form>
+            <div class='right'>
+                <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
+                <div class="text-box">
+                    <!-- Dynamic letter -->
+                    <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>
+                    <!-- Shuffle button -->
+                    <button id="shuffleButton" class="btn btn-primary">Click for Sound!</button>
+                    <!-- Score -->
+                    <div id="score">Score: 0</div>
                 </div>
             </div>
         </div>
+    </div>
 
-       <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
+    <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
 
-<script>
-    var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
-    document.addEventListener('DOMContentLoaded', function () {
-        const images = document.querySelectorAll('.image');
-        const submitButton = document.getElementById('submitButton');
-        const shuffleButton = document.getElementById('shuffleButton');
-        const dynamicLetter = document.getElementById('dynamicLetter');
-        const shuffleSound = document.getElementById('shuffleSound'); // New audio element
 
-        images.forEach(image => {
-            image.addEventListener('click', function () {
-                images.forEach(img => img.classList.remove('selected'));
-                this.classList.add('selected');
-                submitButton.disabled = false;
+    <script>
+        var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
+        document.addEventListener('DOMContentLoaded', function () {
+            const images = document.querySelectorAll('.image');
+            const submitButton = document.getElementById('submitButton');
+            const shuffleButton = document.getElementById('shuffleButton');
+            const dynamicLetter = document.getElementById('dynamicLetter');
+            const shuffleSound = document.getElementById('shuffleSound'); // New audio element
+            let score = 0;
+            let totalAttempts = 0;
+
+            images.forEach(image => {
+                image.addEventListener('click', function () {
+                    images.forEach(img => img.classList.remove('selected'));
+                    this.classList.add('selected');
+                    submitButton.disabled = false;
+                });
             });
-        });
 
-shuffleButton.addEventListener('click', function () {
-    const letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
-    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-    dynamicLetter.textContent = randomLetter;
-    playSounds(randomLetter); // Play the sound for the shuffled letter
-    playShuffleSound(); // Corrected the function call
-});
+            shuffleButton.addEventListener('click', function () {
+                const letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                dynamicLetter.textContent = randomLetter;
+                playSounds(randomLetter); // Play the sound for the shuffled letter
+                playShuffleSound(); // Corrected the function call
+            });
 
+            submitButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                const selectedImage = document.querySelector('.selected');
+                totalAttempts++;
+                if (selectedImage.src.includes(dynamicLetter.textContent)) {
+                    alert('Correct image selected!');
+                    score++;
+                    // Use fetch to send data to the server here
+                } else {
+                    alert('Incorrect image selected. Please try again!');
+                    // Handle the incorrect selection here
+                }
+                updateScore();
+            });
 
-        submitButton.addEventListener('click', function (event) {
-            event.preventDefault();
-            const selectedImage = document.querySelector('.selected');
-            if (selectedImage.src.includes(dynamicLetter.textContent)) {
-                alert('Correct image selected!');
-                // Use fetch to send data to the server here
-            } else {
-                alert('Incorrect image selected. Please try again!');
-                // Handle the incorrect selection here
+            function playSounds(sound_1) {
+                sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';
+                var audio = document.getElementById('shuffleSound'); // Corrected the ID
+                audio.src = "/static/sounds/" + sound_1 + "_sound.mp3";
+                audio.play();
+            }
+
+            function playShuffleSound() {
+                shuffleSound.play();
+            }
+
+            function updateScore() {
+                document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
             }
         });
-
-function playSounds(sound_1) {
-    sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';
-    var audio = document.getElementById('shuffleSound'); // Corrected the ID
-    audio.src = "/static/sounds/" + sound_1 + "_sound.mp3";
-    audio.play();
-}
-
-    });
-    function playShuffleSound() {
-    shuffleSound.play();
-}
-</script>
-    </div>
+    </script>
 </body>
 </html>
 
