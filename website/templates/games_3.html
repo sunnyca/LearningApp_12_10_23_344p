@@ -51,7 +51,6 @@
 </head>
 <body>
 
-
     <div>
         <div>
             <!-- Introduction text -->
@@ -72,7 +71,7 @@
                     {% for image in existing_images %}
                         <label>
                             <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                            <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
+                            <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200" draggable="true" ondragstart="drag(event)">
                         </label>
                     {% endfor %}
                 </div>
@@ -93,7 +92,6 @@
     </div>
 
     <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
-
 
     <script>
         var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
@@ -152,6 +150,11 @@
                 document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
             }
         });
+
+        // Function to handle drag and drop
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.src);
+        }
     </script>
 </body>
 </html>

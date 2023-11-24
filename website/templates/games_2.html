@@ -1,0 +1,170 @@
+{% extends "intro_flow_2.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<html>
+<head>
+    <title>Meet George</title>
+
+    <style>
+        .container {
+            text-align: center;
+        }
+
+        .text-box {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: space-around;
+        }
+
+        .image {
+            width: 200px; /* Adjust the width of the images */
+            height: auto; /* Maintain aspect ratio */
+            border: 2px solid transparent; /* Initially no border */
+            cursor: pointer; /* Change cursor to pointer */
+            transition: border 0.3s; /* Add a smooth transition effect */
+        }
+
+        .selected {
+            border: 2px solid blue; /* Highlight color for selected images */
+        }
+
+        .btn-primary {
+            margin-top: 10px;
+            padding: 15px 30px; /* Adjust padding for larger button */
+            cursor: pointer;
+            font-size: 16px; /* Adjust font size */
+        }
+
+        #score {
+            margin-top: 10px;
+            font-size: 18px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div>
+        <div>
+            <!-- Introduction text -->
+            <p></p>
+            <p class='text'>
+                Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the 
+                image that corresponds to that sound. 
+            </p>
+            <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+            </button>  
+        </div>
+
+        <!-- Image with text box -->
+<div class="image-grid">
+    <form id="imageForm" action="/check" method="post">
+        <div class="image-row">
+            {# Randomly select one image from existing_images #}
+            {% set random_image = existing_images|random %}
+
+            <label>
+                <img class="image" src="{{ url_for('static', filename=id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
+            </label>
+            <div class="button-row" id =submitButton>
+                <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
+                <button class="btn btn-primary incorrect-button" type="button" id="incorrect-button">No, Incorrect</button>
+            </div>
+        </div>
+    </form>
+    <div class='right'>
+        <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
+        <div class="text-box">
+            <!-- Dynamic letter -->
+            <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>
+            <!-- Shuffle button -->
+            <button id="shuffleButton" class="btn btn-primary">Click for Sound!</button>
+            <!-- Score --> 
+            <div id="score">Score: 0</div>
+        </div>
+    </div>
+</div>
+
+    <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
+
+
+<script>
+    
+    var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const images = document.querySelectorAll('.image');
+        const shuffleButton = document.getElementById('shuffleButton');
+        let dynamicLetter = document.getElementById('dynamicLetter');  // Update declaration
+        const shuffleSound = document.getElementById('shuffleSound'); // New audio element
+        let score = 0;
+        let totalAttempts = 0;
+
+        const correctButton = document.getElementById('correct-button');  // Update selector
+        const incorrectButton = document.getElementById('incorrect-button');  // Update selector
+
+        correctButton.addEventListener('click', function () {
+            const selectedImage = document.getElementById('selectedImage');
+            totalAttempts++;
+            if (selectedImage.src.includes(dynamicLetter.textContent)) {
+                alert('Correct image selected!');
+                score++;
+            } else {
+                alert('Incorrect image selected. Please try again!');
+            }
+            updateScore();
+        });
+
+        incorrectButton.addEventListener('click', function () {
+            const selectedImage = document.getElementById('selectedImage');
+            totalAttempts++;
+            if (!selectedImage.src.includes(dynamicLetter.textContent)) {
+                alert('Correct image selected!');
+                score++;
+            } else {
+                alert('Incorrect image selected. Please try again!');
+            }
+            updateScore();
+        });
+
+
+
+        shuffleButton.addEventListener('click', function () {
+            const letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
+            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+            dynamicLetter.textContent = randomLetter;
+            playSounds(randomLetter); // Play the sound for the shuffled letter
+            playShuffleSound(); // Corrected the function call
+        });
+
+        function playSounds(sound_1) {
+            sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';
+            var audio = document.getElementById('shuffleSound'); // Corrected the ID
+            audio.src = "/static/sounds/" + sound_1 + "_sound.mp3";
+            audio.play();
+        }
+
+        function playShuffleSound() {
+            shuffleSound.play();
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
+        }
+        
+
+    });
+</script>
+</body>
+</html>
+
+{% endblock %}
