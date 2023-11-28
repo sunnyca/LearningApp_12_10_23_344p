@@ -112,8 +112,8 @@ def generate_images(sound, prompt=0):
                         "Your request activated the API's safety filters and could not be processed."
                         "Please modify the prompt and try again.")
                 if artifact.type == generation.ARTIFACT_IMAGE:
-                            img = Image.open(io.BytesIO(artifact.binary))
-                img.save("website/static/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
+                    img = Image.open(io.BytesIO(artifact.binary))
+                    img.save("website/static/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
             i += 1
         
         if prompt == 1: #lets us return the prompt for testing purposes
@@ -322,7 +322,7 @@ def store_image_2():
                 else:
                     os.rename("website/static/"+str(current_user.id)+"_p"+str(i)+".png", "website/static/"+str(current_user.id)+"_p.png") #renames the selected image to franchise_p.png
     if not os.path.exists("website/static/"+str(current_user.id)+"_b.png"): 
-        return render_template("intro_flow_6.html", user=current_user,character=current_user.character, id=str(current_user.id))
+        return render_template("intro_flow_6.html", user=current_user,character=current_user.character['b'], id=str(current_user.id))
     else: 
         return store_image_3()
 
@@ -386,10 +386,10 @@ def games():
 def progress_tracker():
     user = User.query.filter_by(id=current_user.id).first()
     #created so we can find each image and its corresponding character
-    image_info = {'sh':' it says /sh/',
-                'p':" it says /p/",
-                'b':' it says /b/',
-                'i':' it says /i/',
+    image_info = {'sh':" it says 'sh'",
+                'p':" it says 'p'",
+                'b':" it says 'b'",
+                'i':" it says 'i'",
                 'logo':'your franchise logo!'}
     
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
