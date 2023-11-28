@@ -408,6 +408,30 @@ def progress_tracker():
 def home():
     return render_template("home.html", user=current_user)
 
+@views.route('/games_2', methods=['GET', 'POST'])
+@login_required
+def games_2():
+    #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    print(existing_images)
+    #loops through each key and updates image_info to say what we want to display
+    for image in existing_images:
+        image_info[image] = 'This is ' + current_user.character[image] + image_info[image]
+
+    return render_template("games_2.html", user=current_user,existing_images=existing_images,image_info=image_info, id=str(current_user.id))
+
+@views.route('/games_3', methods=['GET', 'POST'])
+@login_required
+def games_3():
+    #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    print(existing_images)
+    #loops through each key and updates image_info to say what we want to display
+    for image in existing_images:
+        image_info[image] = 'This is ' + current_user.character[image] + image_info[image]
+
+    return render_template("games_3.html", user=current_user,existing_images=existing_images,image_info=image_info, id=str(current_user.id))
+
 #more legacy code 
 @views.route('/delete-note', methods=['POST'])
 def delete_note():  

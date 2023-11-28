@@ -19,7 +19,8 @@ texts = {'1':"Meet George, George is a 2nd grader struggling with how to pronoun
                     the flash cards hit the link below to help George practice his sounds! If you forget what sound goes with which image,
                     just click on the image below! ''',   
         '7':"Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the image that corresponds to that sound. ",
-        'sh':"how do you say shhhhhhhhhhhh",
+        '8': "What is the first sound in the word SHIP?"
+        ,'sh':"how do you say shhhhhhhhhhhh",
         "p":"how do you say puhhh puhhh puhhh",
         "b":"how do you say buuuuuh",
         "i":"how do you say ihhhhhh"}
