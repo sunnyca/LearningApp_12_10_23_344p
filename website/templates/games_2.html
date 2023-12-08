@@ -40,6 +40,7 @@
             padding: 15px 30px; /* Adjust padding for larger button */
             cursor: pointer;
             font-size: 16px; /* Adjust font size */
+            transition: background-color 0.3s; /* Smooth transition for background color change */
         }
 
         #score {
@@ -50,8 +51,6 @@
     </style>
 </head>
 <body>
-
-
     <div>
         <div>
             <!-- Introduction text -->
@@ -66,105 +65,117 @@
         </div>
 
         <!-- Image with text box -->
-<div class="image-grid">
-    <form id="imageForm" action="/check" method="post">
-        <div class="image-row">
-            {# Randomly select one image from existing_images #}
-            {% set random_image = existing_images|random %}
-
-            <label>
-                <img class="image" src="{{ url_for('static', filename=id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
-            </label>
-            <div class="button-row" id =submitButton>
-                <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
-                <button class="btn btn-primary incorrect-button" type="button" id="incorrect-button">No, Incorrect</button>
+        <div class="image-grid">
+            <div>
+                <form id="imageForm" action="/check" method="post">
+                    <div class="image-row">
+                        {# Randomly select one image from existing_images #}
+                        {% set random_image = existing_images|random %}
+    
+                        <label>
+                            <img class="image" src="{{ url_for('static', filename=id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
+                        </label>
+                        <div class="button-row" id=submitButton>
+                            <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
+                            <button class="btn btn-primary incorrect-button" type="button" id="incorrect-button">No, Incorrect</button>
+                        </div>
+                    </div>
+                </form>
+                <button id="goToNewPageButton" style="display: none; margin: auto; margin-top: 10px; background-color: green;" class='btn btn-primary' onclick="window.location.href = '/games_3'">Go to Next Game</button>
+            </div>
+   
+            <div class='right'>
+                <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
+                <div class="text-box">
+                    <!-- Dynamic letter -->
+                    <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>
+                    <!-- Shuffle button -->
+                    <button id="shuffleButton" class="btn btn-primary">Click for Sound!</button>
+                    <!-- Score --> 
+                    <div id="score">Score: 0</div>
+                </div>
             </div>
         </div>
-    </form>
-    <div class='right'>
-        <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
-        <div class="text-box">
-            <!-- Dynamic letter -->
-            <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>
-            <!-- Shuffle button -->
-            <button id="shuffleButton" class="btn btn-primary">Click for Sound!</button>
-            <!-- Score --> 
-            <div id="score">Score: 0</div>
-        </div>
-    </div>
-</div>
 
-    <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
+        <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
+        <audio id="correctSound" src="{{ url_for('static', filename='sounds/correct_sound.mp3') }}"></audio>
+        <audio id="wrongSound" src="{{ url_for('static', filename='sounds/incorrect_sound.mp3') }}"></audio>
 
-
-<script>
-    
-    var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const images = document.querySelectorAll('.image');
-        const shuffleButton = document.getElementById('shuffleButton');
-        let dynamicLetter = document.getElementById('dynamicLetter');  // Update declaration
-        const shuffleSound = document.getElementById('shuffleSound'); // New audio element
-        let score = 0;
-        let totalAttempts = 0;
-
-        const correctButton = document.getElementById('correct-button');  // Update selector
-        const incorrectButton = document.getElementById('incorrect-button');  // Update selector
-
-        correctButton.addEventListener('click', function () {
-            const selectedImage = document.getElementById('selectedImage');
-            totalAttempts++;
-            if (selectedImage.src.includes(dynamicLetter.textContent)) {
-                alert('Correct image selected!');
-                score++;
-            } else {
-                alert('Incorrect image selected. Please try again!');
-            }
-            updateScore();
-        });
-
-        incorrectButton.addEventListener('click', function () {
-            const selectedImage = document.getElementById('selectedImage');
-            totalAttempts++;
-            if (!selectedImage.src.includes(dynamicLetter.textContent)) {
-                alert('Correct image selected!');
-                score++;
-            } else {
-                alert('Incorrect image selected. Please try again!');
-            }
-            updateScore();
-        });
-
-
-
-        shuffleButton.addEventListener('click', function () {
-            const letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
-            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-            dynamicLetter.textContent = randomLetter;
-            playSounds(randomLetter); // Play the sound for the shuffled letter
-            playShuffleSound(); // Corrected the function call
-        });
-
-        function playSounds(sound_1) {
-            sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';
-            var audio = document.getElementById('shuffleSound'); // Corrected the ID
-            audio.src = "/static/sounds/" + sound_1 + "_sound.mp3";
-            audio.play();
-        }
-
-        function playShuffleSound() {
-            shuffleSound.play();
-        }
-
-        function updateScore() {
-            document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
-        }
+        <script>
+            var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
+            var shuffleSound = document.getElementById('shuffleSound');
+            var correctSound = document.getElementById('correctSound');
+            var wrongSound = document.getElementById('wrongSound');
         
-
-    });
-</script>
-</body>
+            document.addEventListener('DOMContentLoaded', function () {
+                const images = document.querySelectorAll('.image');
+                const shuffleButton = document.getElementById('shuffleButton');
+                let dynamicLetter = document.getElementById('dynamicLetter');
+                const scoreDisplay = document.getElementById('score');
+                const correctButton = document.getElementById('correct-button');
+                const incorrectButton = document.getElementById('incorrect-button');
+        
+                let score = 0;
+                let totalAttempts = 0;
+        
+                correctButton.addEventListener('click', function () {
+                    checkAnswer(true);
+                });
+        
+                incorrectButton.addEventListener('click', function () {
+                    checkAnswer(false);
+                });
+        
+                shuffleButton.addEventListener('click', function () {
+                    const letters = ['sh', 'i', 'p', 'b'];
+                    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                    dynamicLetter.textContent = randomLetter;
+                    playSound(randomLetter, shuffleSound);
+                });
+        
+                function checkAnswer(isCorrect) {
+                    const selectedImage = document.getElementById('selectedImage');
+                    totalAttempts++;
+        
+                    if ((isCorrect && selectedImage.src.includes(dynamicLetter.textContent)) ||
+                        (!isCorrect && !selectedImage.src.includes(dynamicLetter.textContent))) {
+                        // Correct answer
+                        score++;
+                        scoreDisplay.textContent = `Score: ${score} / ${totalAttempts}`;
+                        updateButtonColor('green');
+                        correctSound.play();
+                    } else {
+                        // Incorrect answer
+                        updateButtonColor('red');
+                        wrongSound.play();
+                    }
+        
+                    // Reset button color after a delay
+                    setTimeout(function () {
+                        updateButtonColor('');
+                    }, 1000);
+        
+                    updateScore();
+                }
+        
+                function updateButtonColor(color) {
+                    correctButton.style.backgroundColor = color;
+                    incorrectButton.style.backgroundColor = color;
+                }
+                    
+                function updateScore() {
+                    document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
+                    if (score === 1) {
+                        document.getElementById('goToNewPageButton').style.display = 'block';
+                    }
+                }
+        
+                function playSound(sound, audioElement) {
+                    audioElement.src = `/static/sounds/${sound}_sound2.mp3`;
+                    audioElement.play();
+                }
+            });
+        </script>
+    </body>
 </html>
-
 {% endblock %}

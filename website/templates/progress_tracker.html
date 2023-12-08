@@ -46,10 +46,11 @@
                     Every time you create a flashcard (matching a sound to an image), it will show up here. Once you have reviewed 
                     the flash cards hit the link below to help George practice his sounds! If you forget what sound goes with which image,
                     just click on the image below! 
+                    <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                        <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                    </button> 
                 </p>
-                <button class="microphone-button" type="submit" onclick="toggleAudio()">
-                    <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
-                </button>    
+   
                 <form action="/games" method="get">
                     <button class="btn btn-primary" class='btn btn-primary' type="submit">Go to Game</button>
                 </form>
@@ -57,7 +58,7 @@
                     {% for image in existing_images %}
                     <div class="image">
                         <p>{{ image_info[image] }}</p>
-                        <button class="photo-button" type="submit" name='play' value='1', onclick="playSounds('{{image}}')">
+                        <button class="photo-button" type="submit" name='play' value='1', onclick="playSounds('{{image}}','{{id}}')">
                         <img src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ image }}">
                         </button>    
                     </div>
@@ -70,7 +71,7 @@
             <script>
                 var audio = new Audio("{{ url_for('static', filename='/sounds/6_sound.mp3') }}");
 
-                function playSounds(sound_1) {
+                function playSounds(sound_1, id) {
 
                     sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';
 
@@ -81,7 +82,7 @@
         
                     // Change the source of the audio based on the button clicked
 
-                    audio.src = "/static/sounds/" + sound_1 + "_sound.mp3";
+                    audio.src = "/static/sounds/character" + id +"_"+ sound_1 + ".mp3";
         
                     // Play the audio
                     audio.play();

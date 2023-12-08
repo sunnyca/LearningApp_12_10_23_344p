@@ -59,25 +59,31 @@
             <p class='text'>
                 Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the 
                 image that corresponds to that sound. 
+                <button class="microphone-button" type="submit" onclick="toggleAudio()">
+                    <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
+                </button>  
             </p>
-            <button class="microphone-button" type="submit" onclick="toggleAudio()">
-                <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
-            </button>  
+
         </div>
 
         <!-- Image with text box -->
         <div class="image-grid">
-            <form id="imageForm" action="/check" method="post">
-                <div class="image-row">
-                    {% for image in existing_images %}
-                        <label>
-                            <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                            <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
-                        </label>
-                    {% endfor %}
-                </div>
-                <button id="submitButton" class="btn btn-primary" type="submit" disabled style="margin-top: 10px;">Submit</button>
-            </form>
+            <div>
+                <form id="imageForm" action="/check" method="post">
+                    <div class="image-row">
+                        {% for image in existing_images %}
+                            <label>
+                                <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                                <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <div class="button-container">
+                        <button id="submitButton" class="btn btn-primary" type="submit" disabled>Submit</button>
+                    </div>
+                </form>
+                <button id="goToNewPageButton" style="display: none; margin: auto; margin-top: 10px; background-color: green;" class='btn btn-primary' onclick="window.location.href = '/games_2'">Go to Next Game</button>
+            </div>
             <div class='right'>
                 <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
                 <div class="text-box">
@@ -90,13 +96,15 @@
                 </div>
             </div>
         </div>
-    </div>
+   
 
     <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
 
-
     <script>
         var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
+        var correctSound = new Audio("{{ url_for('static', filename='/sounds/correct_sound.mp3') }}");
+        var wrongSound = new Audio("{{ url_for('static', filename='/sounds/incorrect_sound.mp3') }}");
+    
         document.addEventListener('DOMContentLoaded', function () {
             const images = document.querySelectorAll('.image');
             const submitButton = document.getElementById('submitButton');
@@ -105,15 +113,16 @@
             const shuffleSound = document.getElementById('shuffleSound'); // New audio element
             let score = 0;
             let totalAttempts = 0;
-
+    
             images.forEach(image => {
                 image.addEventListener('click', function () {
                     images.forEach(img => img.classList.remove('selected'));
                     this.classList.add('selected');
                     submitButton.disabled = false;
+                    submitButton.style.backgroundColor = 'blue'; // Reset button color
                 });
             });
-
+    
             shuffleButton.addEventListener('click', function () {
                 const letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
                 const randomLetter = letters[Math.floor(Math.random() * letters.length)];
@@ -121,38 +130,47 @@
                 playSounds(randomLetter); // Play the sound for the shuffled letter
                 playShuffleSound(); // Corrected the function call
             });
-
+    
             submitButton.addEventListener('click', function (event) {
                 event.preventDefault();
                 const selectedImage = document.querySelector('.selected');
                 totalAttempts++;
                 if (selectedImage.src.includes(dynamicLetter.textContent)) {
-                    alert('Correct image selected!');
+                    // Correct image selected
                     score++;
-                    // Use fetch to send data to the server here
+                    submitButton.style.backgroundColor = 'green'; // Change button color to green
+                    correctSound.play(); // Play correct sound
                 } else {
-                    alert('Incorrect image selected. Please try again!');
-                    // Handle the incorrect selection here
+                    // Incorrect image selected
+                    submitButton.style.backgroundColor = 'red'; // Change button color to red
+                    wrongSound.play(); // Play wrong sound
                 }
                 updateScore();
             });
-
+    
             function playSounds(sound_1) {
                 sound_1 = sound_1 !== undefined && sound_1 !== null ? sound_1 : 'sh';
                 var audio = document.getElementById('shuffleSound'); // Corrected the ID
                 audio.src = "/static/sounds/" + sound_1 + "_sound.mp3";
                 audio.play();
             }
-
+    
             function playShuffleSound() {
                 shuffleSound.play();
             }
-
+    
             function updateScore() {
                 document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
+                if (score === 1) {
+                    document.getElementById('goToNewPageButton').style.display = 'block';
+                }
             }
+    
         });
+    
     </script>
+    
+    
 </body>
 </html>
 

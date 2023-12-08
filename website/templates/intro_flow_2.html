@@ -16,6 +16,7 @@
         .left {
             flex: 1;
             padding: 10px;
+            text-align: left;
         }
         .right {
             flex: 1;
@@ -41,23 +42,57 @@
             margin: 10px 0; /* Add some vertical spacing between images */
         }
         /* Add styles for the loading animation */
+        
+        .dropdown {
+            display: inline-block;
+        }
 
     </style>
 </head>
 <body>
     <div class="container">
         <div class="left">
-            <form action="/audio_2" method="post">
-                    What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
+            <p>What's your all-time favorite movie or book franchise? Think of epic stories like Star Wars, Harry Potter, or Marvel! Share with George!
                 <button class="microphone-button" type="submit" onclick="toggleAudio()">
                     <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
                 </button>    
-            </form>
-            <form id="franchise-form" action="/intro_flow_2" method="POST" onsubmit="showLoading()">
-                <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter Franchise Name Here:</label>
-                <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
-                <button class="btn btn-primary" type="submit">Continue</button>
-            </form>
+                <form id="franchise-form" action="/intro_flow_2" method="POST" onsubmit="showLoading()">
+                    <label for="franchise-input" style="font-size: 16px; padding-right: 10px;">Enter franchise name then choose an action you want those characters to preform!</label>
+                    <input type="text" id="franchise-input" name="franchise" placeholder="Franchise Name" style="font-size: 16px; padding: 5px;">
+                    <input type="hidden" id="selectedAction" name="action">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Skateboarding')">Skateboarding</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Soccer')">Soccer</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Basketball')">Basketball</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Football')">Football</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Baseball')">Baseball</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Swimming')">Swimming</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Running')">Running</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Biking')">Biking</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Cooking')">Cooking</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Reading')">Reading</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Writing')">Writing</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Drawing')">Drawing</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Painting')">Painting</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Singing')">Singing</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Dancing')">Dancing</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Instrument')">Instrument</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Video Games')">Video Games</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('TV')">TV</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Sleeping')">Sleeping</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Eating')">Eating</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Shopping')">Shopping</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('NA')"> NA</a>
+                            <a class="dropdown-item" href="#" onclick="handleSelection('Other')">Other</a>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </form>
+            </p>
             <div id="loading" style="display: none; text-align: left;">
                 <div class="loader"></div>
                 <p>Loading...Be Patient!</p>
@@ -74,6 +109,13 @@
         }
 
         var audio = new Audio("{{ url_for('static', filename='/sounds/2_sound.mp3') }}");
+        function handleSelection(selectedValue) {
+            // Set the selected value to the dropdown button text
+            document.getElementById('dropdownMenuButton').innerText = selectedValue;
+            
+            document.getElementById('selectedAction').value = selectedValue;
+            }
+
     </script>
 </body>
 </html>

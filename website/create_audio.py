@@ -3,6 +3,8 @@ from openai import OpenAI
 import openai
 import os
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask_login import login_required, current_user
+from .models import User
 from api_keys import GPT_KEY, STABILITY_KEY
 
 create_audio = Blueprint('create_audio', __name__)
@@ -19,11 +21,9 @@ texts = {'1':"Meet George, George is a 2nd grader struggling with how to pronoun
                     the flash cards hit the link below to help George practice his sounds! If you forget what sound goes with which image,
                     just click on the image below! ''',   
         '7':"Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the image that corresponds to that sound. ",
-        '8': "What is the first sound in the word SHIP?"
-        ,'sh':"how do you say shhhhhhhhhhhh",
-        "p":"how do you say puhhh puhhh puhhh",
-        "b":"how do you say buuuuuh",
-        "i":"how do you say ihhhhhh"}
+        '8': "What is the first sound in the word SHIP?",
+        '9': "Enter franchise name then choose an action you want those characters to preform!"}
+
 
 
 
@@ -37,3 +37,33 @@ for key, text in texts.items():
         )
         response.stream_to_file(f"website/static/sounds/{key}_sound.mp3")
 
+if not os.path.exists(f"website/static/sounds/correct_sound.mp3"):
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="alloy",
+        input="Correct!"
+    )
+    response.stream_to_file(f"website/static/sounds/correct_sound.mp3")
+
+if not os.path.exists(f"website/static/sounds/incorrect_sound.mp3"):
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="alloy",
+        input="Incorrect!"
+    )
+    response.stream_to_file(f"website/static/sounds/incorrect_sound.mp3")
+
+
+sounds = {'sh':" This is how you say shhhhhhhhhhhh",
+                "p":"This is how you say puhhh puhhh puhhh",
+                "b":"This is how you say buuuuuh",
+                "i":"This is how you say  iiiih"}
+
+for key, sound in sounds.items():
+    if not os.path.exists(f"website/static/sounds/{key}_sound2.mp3"):
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=sound
+        )
+        response.stream_to_file(f"website/static/sounds/{key}_sound2.mp3")

@@ -51,19 +51,26 @@
                 </div>
                 <div>
                     <p class='text'>
-                        Lets start with the /sh/ sound. Click on the image that best matches the sound. George is trying to draw {{character}}.
+                        Lets start with the /sh/ sound. Click on the image that best matches the sound. George is trying to draw:
+                        {% for char in character %}
+                            {{ char }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}.
                     </p>
                 </div>
                 <div>
                     <form id="imageForm" action="/store_image_1" method="post" onsubmit="showLoading()">
                         <div class="image-row">
                             {% for i in range(0, 4) %}
-                            <label>
-                                <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                                <img class="image" src="{{ url_for('static', filename= id+'_sh' ~ i ~ '.png') }}" alt="Image {{ i }}">
-                            </label>
+                                <div class="image-container">
+                                    <label>
+                                        <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                                        <img class="image" src="{{ url_for('static', filename= id+'_sh' ~ i ~ '.png') }}" alt="Image {{ i }}">
+                                    </label>
+                                    <p>This is {{ character[i] }}</p>
+                                </div>
                             {% endfor %}
                         </div>
+                        
                         <button id="submitButton" class="btn btn-primary" type="submit" disabled style="margin-left: 10px;">Submit</button>
                     </form>
                     <div id="loading" style="display: none; text-align: left;">
@@ -71,26 +78,36 @@
                         <p>Loading...</p>
                     </div>
                 </div>
-                    <form id="regenerate" action="/regenerate" method="post" value="sh" style="margin-left: 10px;"> <!-- Adding margin-left for spacing between buttons -->            
-                        <button class='btn btn-primary' id="regenerateButton" type="submit" name = "sound" value="sh">Regenerate</button>
-                    </form>
-            </div>
+                <form id="regenerate" action="/regenerate" method="post" value="sh" style="margin-left: 10px;"> <!-- Adding margin-left for spacing between buttons -->
+                    <button class='btn btn-primary' id="regenerateButton" type="submit" name="sound" value="sh">Regenerate</button>
+                </form>
+                
                 <script>
-                    var audio = new Audio("{{ url_for('static', filename='/sounds/5_sound.mp3') }}");
-                    document.addEventListener('DOMContentLoaded', function() {
+                    document.addEventListener('DOMContentLoaded', function () {
                         const images = document.querySelectorAll('.image');
-
+                        const audio = new Audio();
+                
                         images.forEach(image => {
-                            image.addEventListener('click', function() {
+                            image.addEventListener('click', function () {
                                 // Remove 'selected' class from all images
                                 images.forEach(img => img.classList.remove('selected'));
                                 // Add 'selected' class to the clicked image
                                 this.classList.add('selected');
                                 // Enable the submit button when an image is selected
                                 document.getElementById('submitButton').disabled = false;
-
-                                // AJAX POST request to send the selected image number to the server
+                
+                                // Get the selected image number
                                 const selectedImage = this.getAttribute('src').match(new RegExp(id + '_sh(\\d+)\\.png'))[1];
+                                
+                                console.log("Selected image:", selectedImage);
+
+                                // Set the audio source dynamically based on the selected image
+                                audio.src = "{{ url_for('static', filename='/sounds/character_') }}" + selectedImage + "_sh.mp3";
+                
+                                // Play the audio
+                                audio.play();
+                
+                                // AJAX POST request to send the selected image number to the server
                                 fetch('/store_image', {
                                     method: 'POST',
                                     headers: {
@@ -98,16 +115,17 @@
                                     },
                                     body: JSON.stringify({ selected_image: selectedImage })
                                 })
-                                .then(response => {
-                                    console.log('Image selection sent to the server');
-                                })
-                                .catch(error => console.error('Error:', error));
+                                    .then(response => {
+                                        console.log('Image selection sent to the server');
+                                    })
+                                    .catch(error => console.error('Error:', error));
                             });
                         });
                     });
-                            function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
+                
+                    function showLoading() {
+                        document.getElementById('loading').style.display = 'block';
+                    }
                 </script>
             </div>
         

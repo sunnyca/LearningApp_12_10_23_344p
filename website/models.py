@@ -17,5 +17,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     notes = db.relationship('Note')
     franchise = db.Column(db.String(150))
+    action = db.Column(db.String(150))
     character = db.Column(db.JSON)
+
 

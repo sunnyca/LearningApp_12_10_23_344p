@@ -9,6 +9,9 @@ from flask import Flask, g
 from flask import redirect
 from flask import url_for
 from openai import OpenAI
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
+
 
 from api_keys import GPT_KEY, STABILITY_KEY
 
@@ -28,25 +31,28 @@ import io
 import warnings
 
 from gtts import gTTS 
+from sqlalchemy.exc import SQLAlchemyError
+
 
 # region intro stuff 
 order = ["sh","p","b","i"] #this needs to be updated as we introduce more letters 
-# this keeps track of the characters that have been generated so far, could probably go into the database 
-# for the user but doing it locally now 
-characters = {'sh':"",
-                'p':"",
-                'b':"",
-                'i':"",
-                'logo':""}     
+
+sounds = {'sh':"how do you say shhhhhhhhhhhh",
+                "p":"how do you say puhhh puhhh puhhh",
+                "b":"how do you say buuuuuh",
+                "i":"how do you say iiiih"}
+
 image_info = {'sh':' they says /sh/',
             'p':" they says /p/",
             'b':' they says /b/',
             'i':' they says /i/',
             'logo':'your franchise logo!'}   
+
 texts ={'character_sh':"shhhhhhhhhhhh",
         "character_p":"puhhh puhhh puhhh",
         "character_b":"buuuuuh",
-        "character_i":"ihhhhhh"}
+        "character_i":"iiiih",}
+
 extended_order = ["sh","p","b","i","mm","t","d","n","k","g","ng","s","z","f","v","L","3","ch","d3","j","w","h","a","ei","ea","I"]
 
 #IMPORTANT OR ELSE WE CANNOT MAKE THIS WORK 
@@ -74,51 +80,53 @@ stability_api = client.StabilityInference(
 def generate_images(sound, prompt=0):
         #calls gpt model to get character 
         botResponse = client_1.completions.create(model="text-davinci-003",
-        prompt= "give me a person from" + current_user.franchise + "that starts with the" + sound + "sound. Only responded with that person's or objects name.",
+        prompt= "give me 4 characters from" + current_user.franchise + "that starts with the" + sound + "sound. Only responded with each name seperated by a comma.",
         temperature=0.5,
         max_tokens=120,
         top_p=1.0,
         frequency_penalty=0.8,
         presence_penalty=0.0)
         botResponse = botResponse.choices[0].text.lstrip()
-         
-        botResponse_2 = client_1.completions.create(model="text-davinci-003",
-        prompt= "create a text desciption that when fed into the stability api will generate an image of " + botResponse +"from " + current_user.franchise + "make sure it is appropiate for children of all ages, keep it short",
-        temperature=0.5,
-        max_tokens=120,
-        top_p=1.0,
-        frequency_penalty=0.8,
-        presence_penalty=0.0)
-        botResponse_2 = botResponse_2.choices[0].text.lstrip()
         
-        print(botResponse_2)
-        
-        #uses stability to generate images
-        answers = stability_api.generate(
-            prompt=botResponse_2,
-            steps=50, 
-            cfg_scale=8.0, 
-            width=1024, # Generation width, defaults to 512 if not included.
-            height=1024, # Generation height, defaults to 512 if not included.
-            samples=4, # Number of images to generate, defaults to 1 if not included.
-            sampler=generation.SAMPLER_K_DPMPP_2M # Set the sampling algorithm. Defaults to SAMPLER_K_DPP_2M if not included.
-        ) 
+        chars = botResponse.split(",")
         i = 0
-        # names and stores images - again done locally, if we want to publish this would neeed to be pushed to some cloud server 
-        for resp in answers:
-            for artifact in resp.artifacts:
-                if artifact.finish_reason == generation.FILTER:
-                    warnings.warn(
-                        "Your request activated the API's safety filters and could not be processed."
-                        "Please modify the prompt and try again.")
-                if artifact.type == generation.ARTIFACT_IMAGE:
-                    img = Image.open(io.BytesIO(artifact.binary))
-                    img.save("website/static/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
+        for char in chars:
+            botResponse_2 = client_1.completions.create(model="text-davinci-003",
+            prompt= "create a text desciption that when fed into the stability api will generate an image of " + char +"from " + current_user.franchise + "preforming the action" +current_user.action +". Make sure it is appropiate for children of all ages and keep it short",
+            temperature=0.5,
+            max_tokens=120,
+            top_p=1.0,
+            frequency_penalty=0.8,
+            presence_penalty=0.0)
+            botResponse_2 = botResponse_2.choices[0].text.lstrip()
+            print(botResponse_2)
+
+            #uses stability to generate images
+            answers = stability_api.generate(
+                prompt=botResponse_2,
+                steps=50, 
+                cfg_scale=8.0, 
+                width=1024, # Generation width, defaults to 512 if not included.
+                height=1024, # Generation height, defaults to 512 if not included.
+                samples=1, # Number of images to generate, defaults to 1 if not included.
+                sampler=generation.SAMPLER_K_DPMPP_2M # Set the sampling algorithm. Defaults to SAMPLER_K_DPP_2M if not included.
+            ) 
+            # names and stores images - again done locally, if we want to publish this would neeed to be pushed to some cloud server 
+            # naming is very wrong at the moment 
+            for resp in answers:
+                for artifact in resp.artifacts:
+                    if artifact.finish_reason == generation.FILTER:
+                        warnings.warn(
+                            "Your request activated the API's safety filters and could not be processed."
+                            "Please modify the prompt and try again.")
+                    if artifact.type == generation.ARTIFACT_IMAGE:
+                        img = Image.open(io.BytesIO(artifact.binary))
+                        img.save("website/static/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
             i += 1
+            
         
         if prompt == 1: #lets us return the prompt for testing purposes
-            return botResponse
-
+            return chars
 
 def generate_all_images(local_order=order):
     user = User.query.filter_by(id=current_user.id).first()
@@ -129,13 +137,16 @@ def generate_all_images(local_order=order):
     if user.character:
         characters_2 = user.character.copy()
 
+    i = 0
     for sound in local_order:
         if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+".png"):
-            if not os.path.exists("website/static"+str(current_user.id)+"_"+sound+"0.png"):
-                chara = generate_images(sound,1)
-                print(chara)
+            if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+"0.png"):
+                print(str(current_user.id) + " " + sound)
+                charas = generate_images(sound,1)
+                print(charas)
                 print(sound)
-                characters_2[sound] = chara
+                characters_2[sound] = charas
+                i += 1
 
     user.character = characters_2            
     db.session.commit()            
@@ -146,14 +157,26 @@ def generate_audio():
     client_2 = OpenAI(api_key=GPT_KEY)
     user = User.query.filter_by(id=current_user.id).first()
     for sound in order:
-        if not os.path.exists("website/static/sounds/"+sound+"_sound.mp3"):
+        i = 0
+        for char in user.character[sound]:
+            if not os.path.exists("website/static/sounds/character"+str(current_user.id)+sound+".mp3"):
+                response1 = client_2.audio.speech.create(
+                    model="tts-1",
+                    voice="alloy",
+                    input="This is " + char + "it says" + texts['character_'+sound]
+                    )
+                #saves audio 
+                response1.stream_to_file("website/static/sounds/character_"+str(i)+"_"+sound+".mp3")
+                i += 1
+    for token in sounds:
+        if not os.path.exists("website/static/sounds/"+token+"_sound.mp3"):
             response1 = client_2.audio.speech.create(
                 model="tts-1",
                 voice="alloy",
-                input="This is " + user.character[sound] + "it says" + texts[sound]
+                input=sounds[token]
                 )
             #saves audio 
-            response1.stream_to_file("website/static/sounds/character"+sound+"_sound.mp3")
+            response1.stream_to_file("website/static/sounds/"+token+"_sound.mp3") 
     
 
 
@@ -170,9 +193,11 @@ def intro_flow_1():
 @login_required
 def intro_flow_2():
     current_user_id = current_user.id
+
     #skips this screen if user already has a franchise 
-    if current_user.franchise != None:
+    if current_user.action != None:
         #uses openai to generate audio for next screen using franchise name
+        print("intro_flow_2")
         client_2 = OpenAI(api_key=GPT_KEY)
         user = User.query.filter_by(id=current_user.id).first()
         response1 = client_2.audio.speech.create(
@@ -189,11 +214,14 @@ def intro_flow_2():
         print(request.form)
 
         franchise = request.form.get('franchise')        
+        action = request.form.get('action')
+        print(action)
 
-        # Query the User model to find the user by ID
         user = User.query.filter_by(id=current_user_id).first()
         user.franchise = franchise
+        user.action = action
         db.session.commit()
+
 
         #uses openai to generate audio for next screen using franchise name
         client_2 = OpenAI(api_key=GPT_KEY)
@@ -214,6 +242,7 @@ def intro_flow_2():
 @views.route('/intro_flow_3', methods=['GET'])
 @login_required
 def intro_flow_3():
+    print(current_user.character)
     current_user_id = current_user.id
 
     # Query the User model to find the user by ID
@@ -295,13 +324,19 @@ def store_image_1():
     #checks to see if this is from button or redirect
     if request.method == 'POST':
         #if from button removes all but selected image and then renames selected image to franchise_sh.png
+        user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
             if os.path.exists("website/static/"+str(current_user.id)+"_sh"+str(i)+".png"):
                 if i != selected_image:
-                        os.remove("website/static/"+str(current_user.id)+"_sh"+str(i)+".png")
+                    os.remove("website/static/"+str(current_user.id)+"_sh"+str(i)+".png")
+                    os.remove("website/static/sounds/character_"+str(i)+"_sh.mp3")
                 else:
+                    user.character['sh'] = current_user.character['sh'][i]
+                    db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
+                    db.session.commit()
                     os.rename("website/static/"+str(current_user.id)+"_sh"+str(i)+".png", "website/static/"+str(current_user.id)+"_sh.png")
+                    os.rename("website/static/sounds/character_"+str(i)+"_sh.mp3","website/static/sounds/character"+str(current_user.id)+"_sh.mp3" )
     #checks to see if next sound exists already, if not generates images for next sound
     if not os.path.exists("website/static/"+str(current_user.id)+"_p.png"): 
         return render_template("intro_flow_5.html", user=current_user,character=current_user.character['p'], id=str(current_user.id))
@@ -314,13 +349,19 @@ def store_image_1():
 @login_required
 def store_image_2():
     if request.method == 'POST':
+        user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
             if os.path.exists("website/static/"+str(current_user.id)+"_p"+str(i)+".png"):
-                if i-1 != selected_image:
+                if i != selected_image:
                     os.remove("website/static/"+str(current_user.id)+"_p"+str(i)+".png")
+                    os.remove("website/static/sounds/character_"+str(i)+"_p.mp3")
                 else:
+                    user.character['p'] = current_user.character['p'][i]
+                    db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
+                    db.session.commit()
                     os.rename("website/static/"+str(current_user.id)+"_p"+str(i)+".png", "website/static/"+str(current_user.id)+"_p.png") #renames the selected image to franchise_p.png
+                    os.rename("website/static/sounds/character_"+str(i)+"_p.mp3","website/static/sounds/character"+str(current_user.id)+"_p.mp3" )
     if not os.path.exists("website/static/"+str(current_user.id)+"_b.png"): 
         return render_template("intro_flow_6.html", user=current_user,character=current_user.character['b'], id=str(current_user.id))
     else: 
@@ -331,13 +372,19 @@ def store_image_2():
 @login_required
 def store_image_3():
     if request.method == 'POST':
+        user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
             if os.path.exists("website/static/"+str(current_user.id)+"_b"+str(i)+".png"):
                 if i != selected_image:
                     os.remove("website/static/"+str(current_user.id)+"_b"+str(i)+".png")
+                    os.remove("website/static/sounds/character_"+str(i)+"_b.mp3")
                 else:
+                    user.character['b'] = current_user.character['b'][i]
+                    db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
+                    db.session.commit()
                     os.rename("website/static/"+str(current_user.id)+"_b"+str(i)+".png", "website/static/"+str(current_user.id)+"_b.png")
+                    os.rename("website/static/sounds/character_"+str(i)+"_b.mp3","website/static/sounds/character"+str(current_user.id)+"_b.mp3" )
     if not os.path.exists("website/static/"+str(current_user.id)+"_i.png"): 
         return render_template("intro_flow_7.html", user=current_user,character=current_user.character['i'], id=str(current_user.id))
     else:
@@ -348,13 +395,19 @@ def store_image_3():
 @login_required
 def store_image_i():
     if request.method == 'POST':
+        user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
             if os.path.exists("website/static/"+str(current_user.id)+"_i"+str(i)+".png"):
                 if i != selected_image:
                     os.remove("website/static/"+str(current_user.id)+"_i"+str(i)+".png")
+                    os.remove("website/static/sounds/character_"+str(i)+"_i.mp3")
                 else:
+                    user.character['i'] = current_user.character['i'][i]
+                    db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
+                    db.session.commit()
                     os.rename("website/static/"+str(current_user.id)+"_i"+str(i)+".png", "website/static/"+str(current_user.id)+"_i.png")
+                    os.rename("website/static/sounds/character_"+str(i)+"_i.mp3","website/static/sounds/character"+str(current_user.id)+"_i.mp3" )
         return progress_tracker()
     else:
         return progress_tracker()
@@ -384,7 +437,9 @@ def games():
 @views.route('/progress_tracker', methods=['GET', 'POST'])
 @login_required
 def progress_tracker():
+
     user = User.query.filter_by(id=current_user.id).first()
+    print(user.character)
     #created so we can find each image and its corresponding character
     image_info = {'sh':" it says 'sh'",
                 'p':" it says 'p'",
@@ -394,7 +449,6 @@ def progress_tracker():
     
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
     existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
-    print(user.character)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
         image_info[image] = 'This is ' + user.character[image] + image_info[image]
@@ -423,6 +477,7 @@ def games_2():
 @views.route('/games_3', methods=['GET', 'POST'])
 @login_required
 def games_3():
+    print(current_user.character)
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
     existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
     print(existing_images)

@@ -49,17 +49,23 @@
                 </div>
                 <div>
                     <p class='text'>
-                        Great! Now do the same for "p". George is trying to draw {{character}}.
+                        Great! Now do the same for "p". George is trying to draw: 
+                        {% for char in character %}
+                            {{ char }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}.
                     </p>
                 </div>
                 <div>
                     <form id="imageForm" action="/store_image_2" method="post">
                         <div class="image-row">
                             {% for i in range(0, 4) %}
-                            <label>
-                                <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                                <img class="image" src="{{ url_for('static', filename=id+'_p' ~ i ~ '.png') }}" alt="Image {{ i }}">
-                            </label>
+                            <div class="image-container">
+                                <label>
+                                    <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
+                                    <img class="image" src="{{ url_for('static', filename= id+'_p' ~ i ~ '.png') }}" alt="Image {{ i }}">
+                                </label>
+                                <p>This is {{ character[i] }}</p>
+                            </div>
                             {% endfor %}
                         </div>
                         <button id="submitButton" class='btn btn-primary' type="submit" disabled style="margin-left: 10px;">Submit</button>
