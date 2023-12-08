@@ -46,7 +46,16 @@
         #score {
             margin-top: 10px;
             font-size: 18px;
-            color: green;
+            color: green;   
+        }
+        .correct-button {
+            background-color: green;
+            /* Add any other styles you want for the correct button */
+        }
+
+        .incorrect-button {
+            background-color: red;
+            /* Add any other styles you want for the incorrect button */
         }
     </style>
 </head>
@@ -77,7 +86,7 @@
                         </label>
                         <div class="button-row" id=submitButton>
                             <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
-                            <button class="btn btn-primary incorrect-button" type="button" id="incorrect-button">No, Incorrect</button>
+                            <button class="btn btn-primary incorrect-button" type="button" id="incorrect-button">No, Incorrect</button>                            
                         </div>
                     </div>
                 </form>
