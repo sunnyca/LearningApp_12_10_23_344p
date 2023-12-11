@@ -1,248 +1,303 @@
-{% extends "intro_flow_2.html" %}
-{% block title %}Home{% endblock %}
-{% block content %}
+{% extends "intro_flow_2.html" %} {% block title %}Home{% endblock %} {% block
+content %}
 <html>
-<head>
+  <head>
     <title>Meet George</title>
 
     <style>
-        .container {
-            text-align: center;
-        }
+      .container {
+        text-align: center;
+      }
 
-        .text-box {
-            background-color: white;
-            border-radius: 5px;
-            padding: 10px;
-        }
+      .text-box {
+        background-color: white;
+        border-radius: 5px;
+        padding: 10px;
+      }
 
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            justify-content: space-around;
-        }
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        justify-content: space-around;
+      }
 
-        .image {
-            width: 200px; /* Adjust the width of the images */
-            height: auto; /* Maintain aspect ratio */
-            border: 2px solid transparent; /* Initially no border */
-            cursor: pointer; /* Change cursor to pointer */
-            transition: border 0.3s; /* Add a smooth transition effect */
-        }
+      .image {
+        width: 200px; /* Adjust the width of the images */
+        height: auto; /* Maintain aspect ratio */
+        border: 2px solid transparent; /* Initially no border */
+        cursor: pointer; /* Change cursor to pointer */
+        transition: border 0.3s; /* Add a smooth transition effect */
+      }
 
-        .selected {
-            border: 2px solid blue; /* Highlight color for selected images */
-        }
+      .selected {
+        border: 2px solid blue; /* Highlight color for selected images */
+      }
 
-        .btn-primary {
-            margin-top: 10px;
-            padding: 15px 30px; /* Adjust padding for larger button */
-            cursor: pointer;
-            font-size: 16px; /* Adjust font size */
-        }
+      .btn-primary {
+        margin-top: 10px;
+        padding: 15px 30px; /* Adjust padding for larger button */
+        cursor: pointer;
+        font-size: 16px; /* Adjust font size */
+      }
 
-        #score {
-            margin-top: 10px;
-            font-size: 18px;
-            color: green;
-        }
+      .reset-button {
+        margin-top: 80px;
+      }
 
-        /* Add new styles for blank spaces */
-        .blank-space {
+      #score {
+        margin-top: 10px;
+        font-size: 18px;
+        color: green;
+      }
 
-            width: 150px; /* Adjust the width to make it slightly smaller */
-            height: 150px; /* Adjust the height to make it slightly smaller */
-            border: 2px dashed gray; /* Add a dashed border for outline effect */
-            margin-top: 50px; /* Adjust margin as needed */
-        }
+      /* Add new styles for blank spaces */
+      .blank-space {
+        width: 150px; /* Adjust the width to make it slightly smaller */
+        height: 150px; /* Adjust the height to make it slightly smaller */
+        border: 2px dashed gray; /* Add a dashed border for outline effect */
+        margin-top: 50px; /* Adjust margin as needed */
+      }
 
-        /* Add new styles for the blank space container */
-        .blank-space-container {
-            display: flex;
-            justify-content: space-between;
-        }
+      /* Add new styles for the blank space container */
+      .blank-space-container {
+        display: flex;
+        justify-content: space-between;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <p></p>
 
-<p></p>
-
-<!-- Image with text box -->
-<!-- Image with text box -->
-<div class="image-grid">
-    <form id="imageForm" action="/check" method="post">
+    <!-- Image with text box -->
+    <!-- Image with text box -->
+    <div class="image-grid">
+      <form id="imageForm">
         <div class="image-row">
-            {# Randomly select one image from existing_images #}
-            {% set random_image = existing_images|random %}
+          {# Randomly select one image from existing_images #} {% set
+          random_image = existing_images|random %}
 
-            <label>
-                <img class="image" src="{{ url_for('static', filename=id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
-            </label>
-            <div class="button-row" id="submitButton">
-                <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
-                <button class="btn btn-primary incorrect-button" type="button" id="incorrect-button">No, Incorrect</button>
+          <label>
+            <img
+              class="image"
+              src="{{ url_for('static', filename='images/generated/'+id+'_' + random_image + '.png') }}"
+              alt="{{ random_image }}"
+              id="selectedImage"
+            />
+          </label>
+          <div class="button-row" id="submitButton">
+            <button
+              class="btn btn-primary correct-button"
+              type="button"
+              id="correct-button"
+            >
+              Yes, Correct
+            </button>
+            <button
+              class="btn btn-primary incorrect-button"
+              type="button"
+              id="incorrect-button"
+            >
+              No, Incorrect
+            </button>
 
-                <!-- Add blank space container below buttons -->
-                <div class="blank-space-container">
-                    <!-- Three blank spaces -->
-                    <div class="blank-space"></div>
-                    <div class="blank-space"></div>
-                    <div class="blank-space"></div>
-
-                </div>
-                <button class="btn btn-primary reset-button" onclick="resetGame()">Reset Game</button>
-
+            <!-- Add blank space container below buttons -->
+            <div class="blank-space-container">
+              <!-- Three blank spaces -->
+              <div class="blank-space"></div>
+              <div class="blank-space"></div>
+              <div class="blank-space"></div>
             </div>
+            <button
+              class="btn btn-primary reset-button"
+              onclick="() => resetGame()"
+            >
+              Reset Game
+            </button>
+          </div>
         </div>
-    </form>
-    <div class='right'>
-        <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
+      </form>
+      <div class="right">
+        <img
+          src="{{ url_for('static', filename='images/George.jpg') }}"
+          alt="Your Image"
+        />
         <div class="text-box">
-            <!-- Dynamic letter -->
-            <p style="visibility: hidden;"> <span id="dynamicLetter">sh</span></p>
-            What is the <span id="promptPosition">first</span> sound in the word SHIP?
-            <button class="microphone-button" type="submit" onclick="toggleAudio()">
-                <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
-            </button>  
-            <!-- Score --> 
-            <div id="score">Score: 0</div>
+          <!-- Dynamic letter -->
+          <p style="visibility: hidden"><span id="dynamicLetter">sh</span></p>
+          What is the <span id="promptPosition">first</span> sound in the word
+          SHIP?
+          <button
+            class="microphone-button"
+            type="submit"
+            onclick="toggleAudio()"
+          >
+            <i class="fas fa-microphone"></i>
+            <!-- Font Awesome volume button icon -->
+          </button>
+          <!-- Score -->
+          <div id="score">Score: 0</div>
         </div>
+      </div>
     </div>
-</div>
 
-<script>
-    var audio = new Audio("{{ url_for('static', filename='/sounds/8_sound.mp3') }}");
+    <audio
+      id="correctSound"
+      src="{{ url_for('static', filename='sounds/correct_sound.mp3') }}"
+    ></audio>
+    <audio
+      id="wrongSound"
+      src="{{ url_for('static', filename='sounds/incorrect_sound.mp3') }}"
+    ></audio>
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const images = document.querySelectorAll('.image-grid .image');
-        let dynamicLetter = document.getElementById('dynamicLetter');
-        let promptPosition = document.getElementById('promptPosition');
+    <script>
+      var audio;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const images = document.querySelectorAll(".image-grid .image");
+        let dynamicLetter = document.getElementById("dynamicLetter");
+        let promptPosition = document.getElementById("promptPosition");
+        var correctSound = document.getElementById("correctSound");
+        var wrongSound = document.getElementById("wrongSound");
         let score = 0;
         let totalAttempts = 0;
 
-        const correctButton = document.getElementById('correct-button');
-        const incorrectButton = document.getElementById('incorrect-button');
+        const correctButton = document.getElementById("correct-button");
+        const incorrectButton = document.getElementById("incorrect-button");
 
         // Define the expected sequence of sounds
-        const expectedSequence = ['sh', 'i', 'p'];
+        const expectedSequence = ["sh", "i", "p"];
 
         // Define all possible letters for shuffling
-        const allPossibleLetters = ['sh', 'i', 'p', 'b'];
+        const allPossibleLetters = ["sh", "i", "p", "b"];
 
         // Initialize the state machine
         let currentState = 0; // Index of the current expected sound
 
-        correctButton.addEventListener('click', function () {
-            const selectedImage = document.getElementById('selectedImage');
-            totalAttempts++;
+        audio = new Audio(`/static/sounds/${8 + currentState}_sound.mp3`);
 
-            // Extract the image name from the source
-            const imageName = selectedImage.src.split('/').pop().split('_')[1].split('.')[0];
+        correctButton.addEventListener("click", function () {
+          const selectedImage = document.getElementById("selectedImage");
+          totalAttempts++;
 
-            // Check if the image name matches the current expected sound
-            if (imageName === expectedSequence[currentState]) {
-                alert('Correct image selected!');
-                score++;
+          // Extract the image name from the source
+          const imageName = selectedImage.src
+            .split("/")
+            .pop()
+            .split("_")[1]
+            .split(".")[0];
 
-                const blankSpaces = document.querySelectorAll('.blank-space');
-                for (const blankSpace of blankSpaces) {
-                    if (!blankSpace.hasChildNodes()) {
-                        const clonedImage = selectedImage.cloneNode(true);
-                        clonedImage.style.width = '100%';
-                        clonedImage.style.height = '100%';
-                        blankSpace.appendChild(clonedImage);
-                        break;
-                    }
-                }
+          // Check if the image name matches the current expected sound
+          if (imageName === expectedSequence[currentState]) {
+            correctSound.play();
+            score++;
 
-                // Move to the next state
-                currentState++;
-
-                if (currentState < expectedSequence.length) {
-                    // If there are more sounds in the sequence, update the prompt
-                    dynamicLetter.textContent = expectedSequence[currentState];
-                    updatePromptPosition();
-                    shuffleImages();
-                } else {
-                    // If all sounds are matched, show a celebration
-                    alert('Congratulations! You matched all sounds!');
-                    resetGame();
-                }
-            } else {
-                alert('Incorrect image selected. Please try again!');
-                shuffleImages();
+            const blankSpaces = document.querySelectorAll(".blank-space");
+            for (const blankSpace of blankSpaces) {
+              if (!blankSpace.hasChildNodes()) {
+                const clonedImage = selectedImage.cloneNode(true);
+                clonedImage.style.width = "100%";
+                clonedImage.style.height = "100%";
+                blankSpace.appendChild(clonedImage);
+                break;
+              }
             }
 
-            updateScore();
+            // Move to the next state
+            currentState++;
+            audio = new Audio(`/static/sounds/${8 + currentState}_sound.mp3`);
+
+            if (currentState < expectedSequence.length) {
+              // If there are more sounds in the sequence, update the prompt
+              dynamicLetter.textContent = expectedSequence[currentState];
+              updatePromptPosition();
+              shuffleImages();
+            } else {
+              // If all sounds are matched, show a celebration
+              alert("Congratulations! You matched all sounds!");
+            }
+          } else {
+            wrongSound.play();
+            shuffleImages();
+          }
+
+          updateScore();
         });
 
-        incorrectButton.addEventListener('click', function () {
-            const selectedImage = document.getElementById('selectedImage');
-            totalAttempts++;
+        incorrectButton.addEventListener("click", function () {
+          const selectedImage = document.getElementById("selectedImage");
+          totalAttempts++;
 
-            // Extract the image name from the source
-            const imageName = selectedImage.src.split('/').pop().split('.')[0];
+          // Extract the image name from the source
+          const imageName = selectedImage.src.split("/").pop().split(".")[0];
 
-            if (imageName !== expectedSequence[currentState]) {
-                alert('Correct image selected!');
-                score++;
-            } else {
-                alert('Incorrect image selected. Please try again!');
-            }
+          if (imageName !== expectedSequence[currentState]) {
+            correctSound.play();
+            score++;
+          } else {
+            wrongSound.play();
+          }
 
-            updateScore();
-            shuffleImages();
+          updateScore();
+          shuffleImages();
         });
 
         function shuffleImages() {
-            // Shuffle all possible letters
-            for (let i = allPossibleLetters.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allPossibleLetters[i], allPossibleLetters[j]] = [allPossibleLetters[j], allPossibleLetters[i]];
-            }
+          // Shuffle all possible letters
+          for (let i = allPossibleLetters.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allPossibleLetters[i], allPossibleLetters[j]] = [
+              allPossibleLetters[j],
+              allPossibleLetters[i],
+            ];
+          }
 
-            // Select the next sound
-            const randomLetter = allPossibleLetters[currentState];
-            const selectedImage = document.getElementById('selectedImage');
-            const newRandomImageSrc = "/static/" + "{{id}}" + "_" + randomLetter + '.png';
-            selectedImage.src = newRandomImageSrc;
+          // Select the next sound
+          const randomLetter = allPossibleLetters[currentState];
+          const selectedImage = document.getElementById("selectedImage");
+          const newRandomImageSrc =
+            "/static/images/generated/" +
+            "{{id}}" +
+            "_" +
+            randomLetter +
+            ".png";
+          selectedImage.src = newRandomImageSrc;
         }
 
         function updateScore() {
-            document.getElementById('score').textContent = 'Score: ' + score + ' / ' + totalAttempts;
+          document.getElementById("score").textContent =
+            "Score: " + score + " / " + totalAttempts;
         }
 
         function updatePromptPosition() {
-            // Update the prompt position dynamically
-            const positions = ['first', 'second', 'third'];
-            promptPosition.textContent = positions[currentState];
+          // Update the prompt position dynamically
+          const positions = ["first", "second", "third"];
+          promptPosition.textContent = positions[currentState];
         }
 
         function resetGame() {
-            // Reset the game state
-            currentState = 0;
-            dynamicLetter.textContent = expectedSequence[currentState];
-            promptPosition.textContent = 'first';
-            score = 0;
-            totalAttempts = 0;
+          // Reset the game state
+          currentState = 0;
+          dynamicLetter.textContent = expectedSequence[currentState];
+          promptPosition.textContent = "first";
+          score = 0;
+          totalAttempts = 0;
 
-            // Remove the images in the blank spaces
-            const blankSpaces = document.querySelectorAll('.blank-space');
-            for (const blankSpace of blankSpaces) {
-                blankSpace.innerHTML = ''; // Remove all child nodes
-            }
+          // Remove the images in the blank spaces
+          const blankSpaces = document.querySelectorAll(".blank-space");
+          for (const blankSpace of blankSpaces) {
+            blankSpace.innerHTML = ""; // Remove all child nodes
+          }
 
-            // Shuffle the images for the initial state
-            shuffleImages();
+          // Shuffle the images for the initial state
+          shuffleImages();
         }
 
         // Initialize the game
         resetGame();
-    });
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>
 
 {% endblock %}

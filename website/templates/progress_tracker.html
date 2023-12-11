@@ -59,7 +59,7 @@
                     <div class="image">
                         <p>{{ image_info[image] }}</p>
                         <button class="photo-button" type="submit" name='play' value='1', onclick="playSounds('{{image}}','{{id}}')">
-                        <img src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ image }}">
+                        <img src="{{ url_for('static', filename='images/generated/'+id+'_' + image + '.png') }}" alt="{{ image }}">
                         </button>    
                     </div>
                     {% endfor %}

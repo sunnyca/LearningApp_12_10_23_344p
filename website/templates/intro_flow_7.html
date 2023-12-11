@@ -61,7 +61,7 @@
                             {% for i in range(0, 4) %}
                             <label>
                                 <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                                <img class="image" src="{{ url_for('static', filename= id+'_i' ~ i ~ '.png') }}" alt="Image {{ i }}">
+                                <img class="image" src="{{ url_for('static', filename='images/generated/'+id+'_i' ~ i ~ '.png') }}" alt="Image {{ i }}">
                             </label>
                             <p>This is {{ character[i] }}</p> 
                             {% endfor %}

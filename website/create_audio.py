@@ -22,10 +22,8 @@ texts = {'1':"Meet George, George is a 2nd grader struggling with how to pronoun
                     just click on the image below! ''',   
         '7':"Now it's time to teach George! To begin, George will ask how to pronounce a sound, and it is up to you to pick the image that corresponds to that sound. ",
         '8': "What is the first sound in the word SHIP?",
-        '9': "Enter franchise name then choose an action you want those characters to preform!"}
-
-
-
+        '9': "What is the second sound in the word SHIP?",
+        '10': "What is the third sound in the word SHIP?"}
 
 client = OpenAI(api_key=GPT_KEY)
 for key, text in texts.items():
@@ -41,7 +39,7 @@ if not os.path.exists(f"website/static/sounds/correct_sound.mp3"):
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="Correct!"
+        input="Very good!"
     )
     response.stream_to_file(f"website/static/sounds/correct_sound.mp3")
 
@@ -49,21 +47,14 @@ if not os.path.exists(f"website/static/sounds/incorrect_sound.mp3"):
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="Incorrect!"
+        input="Try again!"
     )
     response.stream_to_file(f"website/static/sounds/incorrect_sound.mp3")
 
-
-sounds = {'sh':" This is how you say shhhhhhhhhhhh",
-                "p":"This is how you say puhhh puhhh puhhh",
-                "b":"This is how you say buuuuuh",
-                "i":"This is how you say  iiiih"}
-
-for key, sound in sounds.items():
-    if not os.path.exists(f"website/static/sounds/{key}_sound2.mp3"):
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="alloy",
-            input=sound
-        )
-        response.stream_to_file(f"website/static/sounds/{key}_sound2.mp3")
+if not os.path.exists(f"website/static/sounds/image_represent.mp3"):
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="alloy",
+        input="Does this image represent the sound"
+    )
+    response.stream_to_file(f"website/static/sounds/image_represent.mp3")
