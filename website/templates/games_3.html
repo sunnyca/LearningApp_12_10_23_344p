@@ -68,7 +68,7 @@ content %}
     <!-- Image with text box -->
     <!-- Image with text box -->
     <div class="image-grid">
-      <form id="imageForm" action="/check" method="post">
+      <form id="imageForm">
         <div class="image-row">
           {# Randomly select one image from existing_images #} {% set
           random_image = existing_images|random %}
@@ -104,7 +104,10 @@ content %}
               <div class="blank-space"></div>
               <div class="blank-space"></div>
             </div>
-            <button class="btn btn-primary reset-button" onclick="resetGame()">
+            <button
+              class="btn btn-primary reset-button"
+              onclick="() => resetGame()"
+            >
               Reset Game
             </button>
           </div>
@@ -196,7 +199,6 @@ content %}
             } else {
               // If all sounds are matched, show a celebration
               alert("Congratulations! You matched all sounds!");
-              resetGame();
             }
           } else {
             alert("Incorrect image selected. Please try again!");
