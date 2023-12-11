@@ -78,11 +78,8 @@
             <div>
                 <form id="imageForm" action="/check" method="post">
                     <div class="image-row">
-                        {# Randomly select one image from existing_images #}
-                        {% set random_image = existing_images|random %}
-    
                         <label>
-                            <img class="image" src="{{ url_for('static', filename='images/generated/'+id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
+                            <img class="image" id="selectedImage">
                         </label>
                         <div class="button-row" id=submitButton>
                             <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
@@ -97,7 +94,7 @@
                 <img src="{{ url_for('static', filename='images/George.jpg') }}" alt="Your Image">
                 <div class="text-box">
                     <!-- Dynamic letter -->
-                    <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>
+                    <p style="visibility: hidden;"><span id="dynamicLetter"></span></p>
                     <!-- Shuffle button -->
                     <button id="shuffleButton" class="btn btn-primary">Click for Sound!</button>
                     <!-- Score --> 
@@ -115,7 +112,9 @@
             var shuffleSound = document.getElementById('shuffleSound');
             var correctSound = document.getElementById('correctSound');
             var wrongSound = document.getElementById('wrongSound');
-        
+            let remainingLetters = ['sh', 'i', 'p', 'b'];
+            let remainingImages = ['sh', 'i', 'p', 'b']; 
+
             document.addEventListener('DOMContentLoaded', function () {
                 const images = document.querySelectorAll('.image');
                 const shuffleButton = document.getElementById('shuffleButton');
@@ -136,9 +135,9 @@
                 });
         
                 shuffleButton.addEventListener('click', function () {
-                    const letters = ['sh', 'i', 'p', 'b'];
-                    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                    const randomLetter = remainingLetters[Math.floor(Math.random() * remainingLetters.length)];
                     dynamicLetter.textContent = randomLetter;
+                    selectedImage.src = `/static/images/generated/{{ id }}_${remainingImages[Math.floor(Math.random() * remainingImages.length)]}.png`;
                     playSound(randomLetter, shuffleSound);
                 });
         
@@ -146,13 +145,24 @@
                     const selectedImage = document.getElementById('selectedImage');
                     totalAttempts++;
         
-                    if ((isCorrect && selectedImage.src.includes(dynamicLetter.textContent)) ||
-                        (!isCorrect && !selectedImage.src.includes(dynamicLetter.textContent))) {
+                    const parts = selectedImage.src.split("/")
+                    const fileName = parts[parts.length - 1].split(".")[0]
+                    if ((isCorrect && fileName.includes(dynamicLetter.textContent)) ||
+                        (!isCorrect && !fileName.includes(dynamicLetter.textContent))) {
                         // Correct answer
                         score++;
                         scoreDisplay.textContent = `Score: ${score} / ${totalAttempts}`;
                         updateButtonColor('green');
                         correctSound.play();
+                        if (isCorrect && fileName.includes(dynamicLetter.textContent)) {
+                            remainingImages = remainingImages.filter(l => l !== dynamicLetter.textContent)
+                            remainingLetters = remainingLetters.filter(l => l !== dynamicLetter.textContent)
+                        }
+                        if (remainingImages.length == 0) {
+                            shuffleButton.disabled = 'true';
+                            submitButton.disabled = 'true';
+                            alert("Great job! You taught George all the sounds. Now, go to the next game!")
+                        }
                     } else {
                         // Incorrect answer
                         updateButtonColor('red');
