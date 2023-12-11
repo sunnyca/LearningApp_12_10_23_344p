@@ -103,12 +103,14 @@
             </div>
         </div>
 
+        <audio id="imageRepresentSound" src="{{ url_for('static', filename='sounds/image_represent.mp3') }}"></audio>
         <audio id="shuffleSound" src="{{ url_for('static', filename='sounds/shuffle_sound.mp3') }}"></audio>
         <audio id="correctSound" src="{{ url_for('static', filename='sounds/correct_sound.mp3') }}"></audio>
         <audio id="wrongSound" src="{{ url_for('static', filename='sounds/incorrect_sound.mp3') }}"></audio>
 
         <script>
             var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
+            var imageRepresentSound = document.getElementById('imageRepresentSound');
             var shuffleSound = document.getElementById('shuffleSound');
             var correctSound = document.getElementById('correctSound');
             var wrongSound = document.getElementById('wrongSound');
@@ -160,7 +162,8 @@
                         }
                         if (remainingImages.length == 0) {
                             shuffleButton.disabled = 'true';
-                            submitButton.disabled = 'true';
+                            correctButton.disabled = 'true';
+                            incorrectButton.disabled = 'true';
                             alert("Great job! You taught George all the sounds. Now, go to the next game!")
                         }
                     } else {
@@ -190,8 +193,11 @@
                 }
         
                 function playSound(sound, audioElement) {
-                    audioElement.src = `/static/sounds/${sound}_sound2.mp3`;
-                    audioElement.play();
+                    imageRepresentSound.play();
+                    imageRepresentSound.onended = () => {
+                        audioElement.src = `/static/sounds/${sound}_sound2.mp3`;
+                        audioElement.play();
+                    }
                 }
             });
         </script>

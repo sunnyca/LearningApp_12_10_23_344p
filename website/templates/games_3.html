@@ -41,6 +41,10 @@ content %}
         font-size: 16px; /* Adjust font size */
       }
 
+      .reset-button {
+        margin-top: 80px;
+      }
+
       #score {
         margin-top: 10px;
         font-size: 18px;
@@ -137,15 +141,24 @@ content %}
       </div>
     </div>
 
+    <audio
+      id="correctSound"
+      src="{{ url_for('static', filename='sounds/correct_sound.mp3') }}"
+    ></audio>
+    <audio
+      id="wrongSound"
+      src="{{ url_for('static', filename='sounds/incorrect_sound.mp3') }}"
+    ></audio>
+
     <script>
-      var audio = new Audio(
-        "{{ url_for('static', filename='/sounds/8_sound.mp3') }}"
-      );
+      var audio;
 
       document.addEventListener("DOMContentLoaded", function () {
         const images = document.querySelectorAll(".image-grid .image");
         let dynamicLetter = document.getElementById("dynamicLetter");
         let promptPosition = document.getElementById("promptPosition");
+        var correctSound = document.getElementById("correctSound");
+        var wrongSound = document.getElementById("wrongSound");
         let score = 0;
         let totalAttempts = 0;
 
@@ -161,6 +174,8 @@ content %}
         // Initialize the state machine
         let currentState = 0; // Index of the current expected sound
 
+        audio = new Audio(`/static/sounds/${8 + currentState}_sound.mp3`);
+
         correctButton.addEventListener("click", function () {
           const selectedImage = document.getElementById("selectedImage");
           totalAttempts++;
@@ -174,7 +189,7 @@ content %}
 
           // Check if the image name matches the current expected sound
           if (imageName === expectedSequence[currentState]) {
-            alert("Correct image selected!");
+            correctSound.play();
             score++;
 
             const blankSpaces = document.querySelectorAll(".blank-space");
@@ -190,6 +205,7 @@ content %}
 
             // Move to the next state
             currentState++;
+            audio = new Audio(`/static/sounds/${8 + currentState}_sound.mp3`);
 
             if (currentState < expectedSequence.length) {
               // If there are more sounds in the sequence, update the prompt
@@ -201,7 +217,7 @@ content %}
               alert("Congratulations! You matched all sounds!");
             }
           } else {
-            alert("Incorrect image selected. Please try again!");
+            wrongSound.play();
             shuffleImages();
           }
 
@@ -216,10 +232,10 @@ content %}
           const imageName = selectedImage.src.split("/").pop().split(".")[0];
 
           if (imageName !== expectedSequence[currentState]) {
-            alert("Correct image selected!");
+            correctSound.play();
             score++;
           } else {
-            alert("Incorrect image selected. Please try again!");
+            wrongSound.play();
           }
 
           updateScore();
