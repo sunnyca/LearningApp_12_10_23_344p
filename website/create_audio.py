@@ -60,6 +60,11 @@ if not os.path.exists(f"website/static/sounds/image_represent.mp3"):
     )
     response.stream_to_file(f"website/static/sounds/image_represent.mp3")
 
+sounds_generated_path = 'website/static/sounds/generated'
+os.makedirs(sounds_generated_path, exist_ok=True)
+images_generated_path = 'website/static/images/generated'
+os.makedirs(images_generated_path, exist_ok=True)
+
 source_path = 'website/static/sounds/3_sound.mp3'
 destination_path = 'website/static/sounds/generated/3_sound.mp3'
 shutil.copy(source_path, destination_path)
