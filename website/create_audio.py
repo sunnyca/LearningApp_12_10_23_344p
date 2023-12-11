@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from .models import User
 from api_keys import GPT_KEY, STABILITY_KEY
+import shutil
 
 create_audio = Blueprint('create_audio', __name__)
 
@@ -58,3 +59,7 @@ if not os.path.exists(f"website/static/sounds/image_represent.mp3"):
         input="Does this image represent the sound"
     )
     response.stream_to_file(f"website/static/sounds/image_represent.mp3")
+
+source_path = 'website/static/sounds/3_sound.mp3'
+destination_path = 'website/static/sounds/generated/3_sound.mp3'
+shutil.copy(source_path, destination_path)
