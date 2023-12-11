@@ -1,3 +1,4 @@
+from time import time
 from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
 from flask import session
@@ -121,7 +122,7 @@ def generate_images(sound, prompt=0):
                             "Please modify the prompt and try again.")
                     if artifact.type == generation.ARTIFACT_IMAGE:
                         img = Image.open(io.BytesIO(artifact.binary))
-                        img.save("website/static/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
+                        img.save("website/static/images/generated/"+str(current_user.id)+"_"+sound+str(i)+".png") # this should be done with a unique number for each user not thier franchise
             i += 1
             
         
@@ -139,8 +140,8 @@ def generate_all_images(local_order=order):
 
     i = 0
     for sound in local_order:
-        if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+".png"):
-            if not os.path.exists("website/static/"+str(current_user.id)+"_"+sound+"0.png"):
+        if not os.path.exists("website/static/images/generated/"+str(current_user.id)+"_"+sound+".png"):
+            if not os.path.exists("website/static/sounds/generated/"+str(current_user.id)+"_"+sound+"0.png"):
                 print(str(current_user.id) + " " + sound)
                 charas = generate_images(sound,1)
                 print(charas)
@@ -159,28 +160,24 @@ def generate_audio():
     for sound in order:
         i = 0
         for char in user.character[sound]:
-            if not os.path.exists("website/static/sounds/character"+str(current_user.id)+sound+".mp3"):
+            if not os.path.exists("website/static/sounds/generated/character"+str(current_user.id)+sound+".mp3"):
                 response1 = client_2.audio.speech.create(
                     model="tts-1",
                     voice="alloy",
                     input="This is " + char + "it says" + texts['character_'+sound]
                     )
                 #saves audio 
-                response1.stream_to_file("website/static/sounds/character_"+str(i)+"_"+sound+".mp3")
+                response1.stream_to_file("website/static/sounds/generated/character_"+str(i)+"_"+sound+".mp3")
                 i += 1
     for token in sounds:
-        if not os.path.exists("website/static/sounds/"+token+"_sound.mp3"):
+        if not os.path.exists("website/static/sounds/generated/"+token+"_sound.mp3"):
             response1 = client_2.audio.speech.create(
                 model="tts-1",
                 voice="alloy",
                 input=sounds[token]
                 )
             #saves audio 
-            response1.stream_to_file("website/static/sounds/"+token+"_sound.mp3") 
-    
-
-
-
+            response1.stream_to_file("website/static/sounds/generated/"+token+"_sound.mp3") 
 
 #starts intro 
 @views.route('/intro_flow_1', methods=['GET', 'POST'])
@@ -195,7 +192,7 @@ def intro_flow_2():
     current_user_id = current_user.id
 
     #skips this screen if user already has a franchise 
-    if current_user.action != None:
+    if current_user.franchise != None:
         #uses openai to generate audio for next screen using franchise name
         print("intro_flow_2")
         client_2 = OpenAI(api_key=GPT_KEY)
@@ -206,11 +203,12 @@ def intro_flow_2():
             input="You're ready to start learning with George! He is so excited to learn more about" + user.franchise +"! The next screen will help teach you letters using characters from " + user.franchise + "."
             )
         #saves audio 
-        response1.stream_to_file("website/static/sounds/3_sound.mp3")
+        response1.stream_to_file("website/static/sounds/generated/3_sound.mp3")
         return redirect(url_for('views.intro_flow_3'))
     
     #else asks for franchise name and stores it in database
     elif request.method == 'POST':
+        start_time = time()
         print(request.form)
 
         franchise = request.form.get('franchise')        
@@ -232,8 +230,9 @@ def intro_flow_2():
             input="You're ready to start learning with George! He is so excited to learn more about" + user.franchise +"! The next screen will help teach you letters using characters from " + user.franchise + "."
             )
         #saves audio 
-        response1.stream_to_file("website/static/sounds/3_sound.mp3")
+        response1.stream_to_file("website/static/sounds/generated/3_sound.mp3")
 
+        print(f"Time taken for franchise: {time() - start_time} seconds")
         return redirect(url_for('views.intro_flow_3'))
     else: 
         return render_template('intro_flow_2.html', user=current_user)
@@ -242,6 +241,7 @@ def intro_flow_2():
 @views.route('/intro_flow_3', methods=['GET'])
 @login_required
 def intro_flow_3():
+    start_time = time()
     print(current_user.character)
     current_user_id = current_user.id
 
@@ -255,7 +255,7 @@ def intro_flow_3():
     yourStory = franchise  # Hard Coded Currently (Needs to be dynamic)
 
     #Checks to see if image already exists, if it exists does not regenerate 
-    if not os.path.exists("website/static/franchise"+str(current_user.id)+"_logo.png"):
+    if not os.path.exists("website/static/images/generated/franchise"+str(current_user.id)+"_logo.png"):
         #included for testing 
         print(yourStory)
         #generates logo
@@ -277,21 +277,18 @@ def intro_flow_3():
                         "Please modify the prompt and try again.")
                 if artifact.type == generation.ARTIFACT_IMAGE:
                             img = Image.open(io.BytesIO(artifact.binary))
-                img.save("website/static/franchise"+str(current_user.id)+"_logo.png")
-        generate_all_images(order) #generates and stores all images in order list
-        generate_audio() #generates audio for next screen
-        return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
-    else:
-        generate_all_images(order) #generates and stores all images in order list 
-        generate_audio() #generates audio for next screen
-        return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
+                img.save("website/static/images/generated/franchise"+str(current_user.id)+"_logo.png")
+    generate_all_images(order) #generates and stores all images in order list 
+    generate_audio() #generates audio for next screen
+    print(f"Time taken for franchise: {time() - start_time} seconds")
+    return render_template('intro_flow_3.html', user=current_user, franchise=franchise, id=str(current_user.id))
 
 #fourth screen of intro flow, generates images for sh sound 
 @views.route('/intro_flow_4', methods=['GET', 'POST'])
 @login_required
 def intro_flow_4():
     #Checks to see if image already exists, if it exists skips to next sound 
-    if not os.path.exists("website/static/"+str(current_user.id)+"_sh.png"): 
+    if not os.path.exists("website/static/images/generated/"+str(current_user.id)+"_sh.png"): 
         return render_template("intro_flow_4.html", user=current_user,character=current_user.character['sh'], id=str(current_user.id))
     else:
         return store_image_1()
@@ -327,18 +324,18 @@ def store_image_1():
         user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if os.path.exists("website/static/"+str(current_user.id)+"_sh"+str(i)+".png"):
+            if os.path.exists("website/static/images/generated/"+str(current_user.id)+"_sh"+str(i)+".png"):
                 if i != selected_image:
-                    os.remove("website/static/"+str(current_user.id)+"_sh"+str(i)+".png")
-                    os.remove("website/static/sounds/character_"+str(i)+"_sh.mp3")
+                    os.remove("website/static/images/generated/"+str(current_user.id)+"_sh"+str(i)+".png")
+                    os.remove("website/static/sounds/generated/character_"+str(i)+"_sh.mp3")
                 else:
                     user.character['sh'] = current_user.character['sh'][i]
                     db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
                     db.session.commit()
-                    os.rename("website/static/"+str(current_user.id)+"_sh"+str(i)+".png", "website/static/"+str(current_user.id)+"_sh.png")
-                    os.rename("website/static/sounds/character_"+str(i)+"_sh.mp3","website/static/sounds/character"+str(current_user.id)+"_sh.mp3" )
+                    os.rename("website/static/images/generated/"+str(current_user.id)+"_sh"+str(i)+".png", "website/static/images/generated/"+str(current_user.id)+"_sh.png")
+                    os.rename("website/static/sounds/generated/character_"+str(i)+"_sh.mp3","website/static/sounds/generated/character"+str(current_user.id)+"_sh.mp3" )
     #checks to see if next sound exists already, if not generates images for next sound
-    if not os.path.exists("website/static/"+str(current_user.id)+"_p.png"): 
+    if not os.path.exists("website/static/images/generated/"+str(current_user.id)+"_p.png"): 
         return render_template("intro_flow_5.html", user=current_user,character=current_user.character['p'], id=str(current_user.id))
     #if next sound exists skips to next sound
     else:
@@ -352,17 +349,17 @@ def store_image_2():
         user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if os.path.exists("website/static/"+str(current_user.id)+"_p"+str(i)+".png"):
+            if os.path.exists("website/static/images/generated/"+str(current_user.id)+"_p"+str(i)+".png"):
                 if i != selected_image:
-                    os.remove("website/static/"+str(current_user.id)+"_p"+str(i)+".png")
-                    os.remove("website/static/sounds/character_"+str(i)+"_p.mp3")
+                    os.remove("website/static/images/generated/"+str(current_user.id)+"_p"+str(i)+".png")
+                    os.remove("website/static/sounds/generated/character_"+str(i)+"_p.mp3")
                 else:
                     user.character['p'] = current_user.character['p'][i]
                     db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
                     db.session.commit()
-                    os.rename("website/static/"+str(current_user.id)+"_p"+str(i)+".png", "website/static/"+str(current_user.id)+"_p.png") #renames the selected image to franchise_p.png
-                    os.rename("website/static/sounds/character_"+str(i)+"_p.mp3","website/static/sounds/character"+str(current_user.id)+"_p.mp3" )
-    if not os.path.exists("website/static/"+str(current_user.id)+"_b.png"): 
+                    os.rename("website/static/images/generated/"+str(current_user.id)+"_p"+str(i)+".png", "website/static/images/generated/"+str(current_user.id)+"_p.png") #renames the selected image to franchise_p.png
+                    os.rename("website/static/sounds/generated/character_"+str(i)+"_p.mp3","website/static/sounds/generated/character"+str(current_user.id)+"_p.mp3" )
+    if not os.path.exists("website/static/images/generated/"+str(current_user.id)+"_b.png"): 
         return render_template("intro_flow_6.html", user=current_user,character=current_user.character['b'], id=str(current_user.id))
     else: 
         return store_image_3()
@@ -375,17 +372,17 @@ def store_image_3():
         user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if os.path.exists("website/static/"+str(current_user.id)+"_b"+str(i)+".png"):
+            if os.path.exists("website/static/images/generated/"+str(current_user.id)+"_b"+str(i)+".png"):
                 if i != selected_image:
-                    os.remove("website/static/"+str(current_user.id)+"_b"+str(i)+".png")
-                    os.remove("website/static/sounds/character_"+str(i)+"_b.mp3")
+                    os.remove("website/static/images/generated/"+str(current_user.id)+"_b"+str(i)+".png")
+                    os.remove("website/static/sounds/generated/character_"+str(i)+"_b.mp3")
                 else:
                     user.character['b'] = current_user.character['b'][i]
                     db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
                     db.session.commit()
-                    os.rename("website/static/"+str(current_user.id)+"_b"+str(i)+".png", "website/static/"+str(current_user.id)+"_b.png")
-                    os.rename("website/static/sounds/character_"+str(i)+"_b.mp3","website/static/sounds/character"+str(current_user.id)+"_b.mp3" )
-    if not os.path.exists("website/static/"+str(current_user.id)+"_i.png"): 
+                    os.rename("website/static/images/generated/"+str(current_user.id)+"_b"+str(i)+".png", "website/static/images/generated/"+str(current_user.id)+"_b.png")
+                    os.rename("website/static/sounds/generated/character_"+str(i)+"_b.mp3","website/static/sounds/generated/character"+str(current_user.id)+"_b.mp3" )
+    if not os.path.exists("website/static/images/generated/"+str(current_user.id)+"_i.png"): 
         return render_template("intro_flow_7.html", user=current_user,character=current_user.character['i'], id=str(current_user.id))
     else:
         return store_image_i()
@@ -398,16 +395,16 @@ def store_image_i():
         user = User.query.filter_by(id=current_user.id).first()
         selected_image = int(request.form['selected_image'])
         for i in range(0,4):
-            if os.path.exists("website/static/"+str(current_user.id)+"_i"+str(i)+".png"):
+            if os.path.exists("website/static/images/generated/"+str(current_user.id)+"_i"+str(i)+".png"):
                 if i != selected_image:
-                    os.remove("website/static/"+str(current_user.id)+"_i"+str(i)+".png")
-                    os.remove("website/static/sounds/character_"+str(i)+"_i.mp3")
+                    os.remove("website/static/images/generated/"+str(current_user.id)+"_i"+str(i)+".png")
+                    os.remove("website/static/sounds/generated/character_"+str(i)+"_i.mp3")
                 else:
                     user.character['i'] = current_user.character['i'][i]
                     db.session.query(User).filter(user.id == current_user.id).update({"character": user.character})
                     db.session.commit()
-                    os.rename("website/static/"+str(current_user.id)+"_i"+str(i)+".png", "website/static/"+str(current_user.id)+"_i.png")
-                    os.rename("website/static/sounds/character_"+str(i)+"_i.mp3","website/static/sounds/character"+str(current_user.id)+"_i.mp3" )
+                    os.rename("website/static/images/generated/"+str(current_user.id)+"_i"+str(i)+".png", "website/static/images/generated/"+str(current_user.id)+"_i.png")
+                    os.rename("website/static/sounds/generated/character_"+str(i)+"_i.mp3","website/static/sounds/generated/character"+str(current_user.id)+"_i.mp3" )
         return progress_tracker()
     else:
         return progress_tracker()
@@ -421,7 +418,7 @@ def store_image_i():
 @login_required
 def games():
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
-    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/images/generated/{str(current_user.id)}_{image}.png")]
     print(existing_images)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
@@ -448,7 +445,7 @@ def progress_tracker():
                 'logo':'your franchise logo!'}
     
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
-    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/images/generated/{str(current_user.id)}_{image}.png")]
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
         image_info[image] = 'This is ' + user.character[image] + image_info[image]
@@ -466,7 +463,7 @@ def home():
 @login_required
 def games_2():
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
-    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/images/generated/{str(current_user.id)}_{image}.png")]
     print(existing_images)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:
@@ -479,7 +476,7 @@ def games_2():
 def games_3():
     print(current_user.character)
     #This is confusedly named but it itterates through image_info and then returns the keys (honestly not sure why I did this but it is here)
-    existing_images = [image for image in image_info if os.path.exists(f"website/static/{str(current_user.id)}_{image}.png")]
+    existing_images = [image for image in image_info if os.path.exists(f"website/static/images/generated/{str(current_user.id)}_{image}.png")]
     print(existing_images)
     #loops through each key and updates image_info to say what we want to display
     for image in existing_images:

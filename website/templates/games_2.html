@@ -82,7 +82,7 @@
                         {% set random_image = existing_images|random %}
     
                         <label>
-                            <img class="image" src="{{ url_for('static', filename=id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
+                            <img class="image" src="{{ url_for('static', filename='images/generated/'+id+'_' + random_image + '.png') }}" alt="{{ random_image }}"  id="selectedImage">
                         </label>
                         <div class="button-row" id=submitButton>
                             <button class="btn btn-primary correct-button" type="button" id="correct-button">Yes, Correct</button>
@@ -94,7 +94,7 @@
             </div>
    
             <div class='right'>
-                <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
+                <img src="{{ url_for('static', filename='images/George.jpg') }}" alt="Your Image">
                 <div class="text-box">
                     <!-- Dynamic letter -->
                     <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>

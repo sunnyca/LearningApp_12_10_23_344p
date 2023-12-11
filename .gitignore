@@ -1,4 +1,9 @@
 .vscode
-website/__pycache__
+**/.DS_Store
+__pycache__/*
+website/__pycache__/*
+website/static/images/generated/*
+website/static/sounds/generated/*
 website/database.db
+instance/database.db
 api_keys.py

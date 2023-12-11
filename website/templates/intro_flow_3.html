@@ -62,12 +62,13 @@
                 <button class="btn btn-primary" onclick="window.location.href='/intro_flow_4'">Continue</button>
                 </div>
                 <div class="right">
-                    <img src="{{ url_for('static', filename='franchise'+id+'_logo.png') }}">
+                    <img src="{{ url_for('static', filename='images/generated/franchise'+id+'_logo.png') }}">
                 </div>
             </div>
 
         <script>
-            var audio = new Audio("{{ url_for('static', filename='/sounds/3_sound.mp3') }}");
+            var audio = new Audio("{{ url_for('static', filename='sounds/generated/3_sound.mp3') }}");
+            audio.onerror = function() { audio.src = "{{ url_for('static', filename='sounds/3_sound.mp3') }}"};
         </script>    
 
 

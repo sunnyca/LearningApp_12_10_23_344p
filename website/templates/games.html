@@ -74,7 +74,7 @@
                         {% for image in existing_images %}
                             <label>
                                 <input type="checkbox" name="selected_image" value="{{ i }}" style="display: none;">
-                                <img class="image" src="{{ url_for('static', filename=id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
+                                <img class="image" src="{{ url_for('static', filename='images/generated/'+id+'_' + image + '.png') }}" alt="{{ i }}" width="200" height="200">
                             </label>
                         {% endfor %}
                     </div>
@@ -85,7 +85,7 @@
                 <button id="goToNewPageButton" style="display: none; margin: auto; margin-top: 10px; background-color: green;" class='btn btn-primary' onclick="window.location.href = '/games_2'">Go to Next Game</button>
             </div>
             <div class='right'>
-                <img src="{{ url_for('static', filename='George.jpg') }}" alt="Your Image">
+                <img src="{{ url_for('static', filename='images/George.jpg') }}" alt="Your Image">
                 <div class="text-box">
                     <!-- Dynamic letter -->
                     <p style="visibility: hidden;"><span id="dynamicLetter">sh</span></p>

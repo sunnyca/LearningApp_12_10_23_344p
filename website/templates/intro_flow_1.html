@@ -1,89 +1,93 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-    %}
+%}
 
+<html>
+  <head>
+    <title>Meet George</title>
+    <style>
+      /* Styling for the layout */
+      .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+      }
+      .left {
+        flex: 1;
+        padding: 10px;
+      }
+      .right {
+        flex: 1;
+        text-align: right;
+      }
+      .george-image {
+        max-width: 100%;
+        height: auto;
+      }
 
-    <html>
-        <head>
-            <title>Meet George</title>
-            <style>
-                /* Styling for the layout */
-                .container {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 20px;
-                }
-                .left {
-                    flex: 1;
-                    padding: 10px;
-                }
-                .right {
-                    flex: 1;
-                    text-align: right;
-                }
-                .george-image {
-                    max-width: 100%;
-                    height: auto;
-                }
-                
+      /* Style for the container */
+      .image-container {
+        display: none;
+        flex-direction: column; /* Stack images vertically */
+        align-items: Right; /* Places the images right horizontally */
+        gap: 10px;
+      }
+      /* Style for each image */
+      .image {
+        max-width: 100%; /* Ensure images fit within the container */
+        height: auto; /* Maintain the aspect ratio of the images */
+        margin: 10px 0; /* Add some vertical spacing between images */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="left">
+        <p>
+          Meet George, George is a 2nd grader struggling with how to pronounce
+          certain words. George wants to know what movies or books series you
+          like so he can learn from you about different letter sounds! Help
+          George learn to read by selecting the characters that correspond to
+          each part of the word. If you can't remember who a certain character
+          represents, ask George; he is sure to know them all.
+          <!-- Remove the form tag, as we don't need to submit a form for this -->
+          <button class="microphone-button" onclick="toggleAudio()">
+            <i class="fas fa-microphone"></i>
+            <!-- Font Awesome volume button icon -->
+          </button>
+        </p>
+        <!-- Button with an id for reference -->
+        <button class="btn btn-primary" onclick="performActions()">
+          Continue
+        </button>
+      </div>
+      <div class="right">
+        <img
+          src="{{ url_for('static', filename='images/George.jpg') }}"
+          class="george-image"
+        />
+      </div>
+    </div>
+    <div id="loading" style="display: none; text-align: left">
+      <div class="loader"></div>
+      <p>Loading...Be Patient!</p>
+    </div>
+    <script>
+      var audio = new Audio(
+        "{{ url_for('static', filename='/sounds/1_sound.mp3') }}"
+      );
+      function showLoading() {
+        document.getElementById("loading").style.display = "block";
+      }
+      function performActions() {
+        // First action
+        showLoading();
 
-                /* Style for the container */
-                .image-container {
-                    display: none;
-                    flex-direction: column; /* Stack images vertically */
-                    align-items: Right; /* Places the images right horizontally */
-                    gap: 10px
-                }
-                /* Style for each image */
-                .image {
-                    max-width: 100%; /* Ensure images fit within the container */
-                    height: auto; /* Maintain the aspect ratio of the images */
-                    margin: 10px 0; /* Add some vertical spacing between images */
-                }
-
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="left">
-                    <p>
-                        Meet George, George is a 2nd grader struggling with how to pronounce certain words. George wants to know what movies or books series you like so he can learn from you about different letter sounds! Help George learn to read by selecting the characters that correspond to each part of the word.
-                        If you can't remember who a certain character represents, ask George; he is sure to know them all.
-                        <!-- Remove the form tag, as we don't need to submit a form for this -->
-                        <button class="microphone-button" onclick="toggleAudio()">
-                            <i class="fas fa-microphone"></i> <!-- Font Awesome volume button icon -->
-                        </button>
-                    </p>
-                    <!-- Button with an id for reference -->
-                    <button class="btn btn-primary" onclick="performActions()">Continue</button>
-                </div>
-                <div class="right">
-                    <img src="{{ url_for('static', filename='George.jpg') }}" class="george-image">
-                </div>
-            </div> 
-            <div id="loading" style="display: none; text-align: left;">
-                <div class="loader"></div>
-                <p>Loading...Be Patient!</p>
-            </div>
-            <script>
-                var audio = new Audio("{{ url_for('static', filename='/sounds/1_sound.mp3') }}");
-                function showLoading() {
-                    document.getElementById('loading').style.display = 'block';
-                }   
-                function performActions() {
-                    // First action
-                    showLoading();
-
-                    // Second action
-                    window.location.href = '/intro_flow_2';
-
-                }
-            </script>
-
-        
-        </body>
-        </html>
-    
-
+        // Second action
+        window.location.href = "/intro_flow_2";
+      }
+    </script>
+  </body>
+</html>
 
 {% endblock %}
