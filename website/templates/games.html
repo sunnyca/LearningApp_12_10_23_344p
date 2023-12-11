@@ -104,6 +104,7 @@
         var audio = new Audio("{{ url_for('static', filename='/sounds/7_sound.mp3') }}");
         var correctSound = new Audio("{{ url_for('static', filename='/sounds/correct_sound.mp3') }}");
         var wrongSound = new Audio("{{ url_for('static', filename='/sounds/incorrect_sound.mp3') }}");
+        let letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
     
         document.addEventListener('DOMContentLoaded', function () {
             const images = document.querySelectorAll('.image');
@@ -124,7 +125,6 @@
             });
     
             shuffleButton.addEventListener('click', function () {
-                const letters = ['sh', 'i', 'p', 'b']; // Add more letters as needed
                 const randomLetter = letters[Math.floor(Math.random() * letters.length)];
                 dynamicLetter.textContent = randomLetter;
                 playSounds(randomLetter); // Play the sound for the shuffled letter
@@ -135,11 +135,18 @@
                 event.preventDefault();
                 const selectedImage = document.querySelector('.selected');
                 totalAttempts++;
-                if (selectedImage.src.includes(dynamicLetter.textContent)) {
+                const parts = selectedImage.src.split("/")
+                if (parts[parts.length - 1].split(".")[0].includes(dynamicLetter.textContent)) {
                     // Correct image selected
                     score++;
                     submitButton.style.backgroundColor = 'green'; // Change button color to green
                     correctSound.play(); // Play correct sound
+                    letters = letters.filter(l => l !== dynamicLetter.textContent)
+                    if (letters.length == 0) {
+                        shuffleButton.disabled = 'true';
+                        submitButton.disabled = 'true';
+                        alert("Great job! You picked all the sounds correctly. Now, go to the next game!")
+                    }
                 } else {
                     // Incorrect image selected
                     submitButton.style.backgroundColor = 'red'; // Change button color to red
