@@ -41,7 +41,7 @@ if not os.path.exists(f"website/static/sounds/correct_sound.mp3"):
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="Correct!"
+        input="Very good!"
     )
     response.stream_to_file(f"website/static/sounds/correct_sound.mp3")
 
@@ -49,7 +49,7 @@ if not os.path.exists(f"website/static/sounds/incorrect_sound.mp3"):
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="Incorrect!"
+        input="Try again!"
     )
     response.stream_to_file(f"website/static/sounds/incorrect_sound.mp3")
 
